@@ -21,6 +21,22 @@ knitr::opts_chunk$set(
 A package designed to improve the interpretation of the Standardized
 Precipitation-Evapotranspiration index (SPEI) under changing climate conditions.
 
+## Authors
+
+**Gabriel Constantino Blain**  
+Maintainer and main author  
+[ORCID 0000-0001-8832-7734](https://orcid.org/0000-0001-8832-7734)  
+Email: [gabriel.blain@sp.gov.br](mailto:gabriel.blain@sp.gov.br)
+
+**Graciela R. Sobierajski**  
+Co-author  
+[ORCID 0000-0002-7211-9268](https://orcid.org/0000-0002-7211-9268)
+
+**Leticia L. Martins**  
+Co-author  
+[ORCID 0000-0002-0299-3005](https://orcid.org/0000-0002-0299-3005)
+
+
 ## Basic Description
 
 The {SPEIChanges} package was created to detect climate changes in the balance
