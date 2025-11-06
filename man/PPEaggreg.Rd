@@ -33,6 +33,6 @@ quasi-weekly totals, which aligns with the widely used one month time scale.
 }
 \examples{
 daily.PPE <- Campinas[, 11]
-PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 
 }
