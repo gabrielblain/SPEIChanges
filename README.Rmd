@@ -64,9 +64,9 @@ This is a basic example which shows a basic use of the two most important packag
 
 ```{r example}
 library(SPEIChanges)
-#' daily.PPE <- Campinas[, 11]
-#' PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
-#' Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5)
+daily.PPE <- Campinas[, 11]
+PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5)
 ```
 
 ## References
