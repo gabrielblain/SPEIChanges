@@ -1,7 +1,7 @@
-#' Aggregate daily precipitation minus potential evapotranspiration (P-PE)
+#' Aggregate daily precipitation minus potential evapotranspiration (P - PE)
 #' totals at quasi-week time scales
 #'
-#' @param daily.PPE Numeric vector, 1-column matrix, or data frame with daily P-PE totals.
+#' @param daily.PPE Numeric vector, 1-column matrix, or data frame with daily P - PE totals.
 #' @param start.date Date at which the aggregation should start.
 #'   Accepts most common formats (e.g., "YYYY-MM-DD", "YYYY/MM/DD").
 #' @param TS Integer indicating the time scale on a quasi-week basis
@@ -15,91 +15,148 @@
 #' days 1–7, 8–14, 15–21, and 22–end of month. This yields 48 quasi-week
 #' intervals per year, independent of the aggregation scale.
 #' When `TS = 4`, the function computes rolling sums of four consecutive
-#' quasi-weekly totals (≈ one month).
+#' quasi-weekly totals, which aligns with the widely used one month time scale.
 #'
-#' @examplesIf interactive()
-#' daily.PPE <- CampinasPPE[, 2]
-#' PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1980-01-01", TS = 4)
+#' @examples
+#' daily.PPE <- Campinas[, 11]
+#' PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #'
 #' @importFrom lubridate year month day parse_date_time
 #' @importFrom zoo rollsum
-#' @importFrom stats na.omit aggregate
-#' @importFrom utils tail
+#' @importFrom stats na.omit
 #' @export
 PPEaggreg <- function(daily.PPE, start.date, TS = 4L) {
 
-  # --- Input validation ---
-  daily.PPE <- as.numeric(daily.PPE)
-  if (anyNA(daily.PPE))
-    stop("Missing P-PE values detected. Please remove or impute them before aggregation.")
-  if (length(daily.PPE) < 3650)
-    stop("Less than 10 years of P-PE records. Cannot proceed.")
-  if (length(daily.PPE) < 10950)
-    warning("Less than 30 years of P-PE records. Longer records are recommended.")
-  if (!is.numeric(TS) || length(TS) != 1 || TS < 1 || TS > 96)
-    stop("`TS` must be an integer between 1 and 96.")
-
-  # --- Date sequence setup ---
-  start.date <- .check_date(start.date)
-  all.dates <- seq.Date(start.date, by = "day", length.out = length(daily.PPE))
-  years  <- year(all.dates)
-  months <- month(all.dates)
-  days   <- day(all.dates)
-
-  # --- Quasi-week assignment ---
-  quasiWeek <- cut(days, breaks = c(0, 7, 14, 21, 31), labels = 1:4, right = TRUE)
-  df <- data.frame(Year = years, Month = months,
-                   quasiWeek = as.integer(quasiWeek),
-                   PPE = daily.PPE)
-
-  # --- Aggregate by quasi-week ---
-  weekly_sum <- aggregate(PPE ~ Year + Month + quasiWeek, df, sum, na.rm = TRUE)
-  weekly_sum <- weekly_sum[order(weekly_sum$Year, weekly_sum$Month, weekly_sum$quasiWeek), ]
-
-  # --- Apply rolling sum for selected TS ---
-  if (TS > 1) {
-    roll_vals <- rollsum(weekly_sum$PPE, TS, align = "right", na.pad = TRUE)
-    weekly_sum[[paste0("PPE.at.TS", TS)]] <- roll_vals
-  } else {
-    weekly_sum[[paste0("PPE.at.TS", TS)]] <- weekly_sum$PPE
+  daily.PPE <- as.matrix(daily.PPE)
+  if (!is.numeric(daily.PPE) || anyNA(daily.PPE) ||
+      ncol(daily.PPE) != 1) {
+    stop("Physically impossible or missing P-PE values.")
+  }
+  if (!is.numeric(TS) || length(TS) != 1 ||
+      TS < 1 ||
+      TS > 96) {
+    stop("TS must be an integer between 1 and 96.")
   }
 
-  # --- Trim incomplete end periods ---
-  final.day <- tail(days, 1)
-  final.quasiweek <- pmin(4, ceiling(final.day / 7))
-  final.year  <- tail(years, 1)
-  final.month <- tail(months, 1)
-  weekly_sum <- subset(
-    weekly_sum,
-    (Year < final.year) |
-      (Year == final.year & Month < final.month) |
-      (Year == final.year & Month == final.month & quasiWeek <= final.quasiweek)
-  )
+  n <- length(daily.PPE)
+  if (n < 3650) {
+    stop("Less than 10 years of P-PE records. We cannot proceed.")
+  }
+  if (n < 10950) {
+    warning("Less than 30 years of P-PE records. Longer periods are highly recommended.")
+  }
+  start.cycle <- .check_date(start.date)
+  end.cycle <- start.cycle + (n - 1)
+  all.period <- seq(start.cycle, end.cycle, "days")
+  years <- year(all.period)
+  months <- month(all.period)
+  days <- day(all.period)
+  PPE <- matrix(NA, n, 4)
+  PPE[, 1:4] <- c(years, months, days, daily.PPE)
+  a <- 1
+  b <- 2
+  c <- 3
+  d <- 4
+  data.week <- matrix(NA, n, 5)
+  start.year <- PPE[1,1]
+  final.year <- PPE[n,1]
+  start.month <- PPE[1,2]
+  final.month <- PPE[n,2]
+  month <- start.month
+  year <- start.year
+  while (year <= final.year || month <= final.month) {
+    data.week1 <- sum(PPE[which(PPE[,1] ==
+                                  year &
+                                  PPE[,2] == month &
+                                  PPE[,3] <= 7),4])
+    data.week2 <- sum(PPE[which(PPE[,1] ==
+                                  year &
+                                  PPE[,2] == month &
+                                  PPE[,3] > 7 &
+                                  PPE[,3] <= 14), 4])
+    data.week3 <- sum(PPE[which(PPE[,1] ==
+                                  year &
+                                  PPE[,2] == month &
+                                  PPE[,3] > 14 &
+                                  PPE[,3] <= 21), 4])
+    data.week4 <- sum(PPE[which(PPE[,1] ==
+                                  year &
+                                  PPE[,2] == month &
+                                  PPE[,3] > 21),4])
+    data.week[a, 1:4] <- c(year, month, 1, data.week1)
+    data.week[b, 1:4] <- c(year, month, 2, data.week2)
+    data.week[c, 1:4] <- c(year, month, 3, data.week3)
+    data.week[d, 1:4] <- c(year, month, 4, data.week4)
+    month <- month + 1
+    if (year == final.year & month > final.month) {
+      break
+    }
+    if (month > 12) {
+      year <- year + 1
+      month <- 1
+    }
+    a <- a + 4
+    b <- b + 4
+    c <- c + 4
+    d <- d + 4
+  }
+  if (TS > 1){
+    data.at.TS <- na.omit(rollsum(data.week[,4],TS))
+    n.TS <- length(data.at.TS)
+    data.week[TS:(n.TS+(TS-1)),5]<- data.at.TS
+    data.week <- data.week[-c((n.TS+(TS)):n),]
+  } else{
+    data.week[,5] <- data.week[,4]
+  }
+  data.week <- data.week[,-c(4)]
+  data.week <- na.omit(data.week)
+  colnames(data.week) <- c("Year", "Month", "quasiWeek", paste0("PPE.at.TS", TS))
+  final.day <- days[n]
+  final.quasiweek <- pmin(4, ceiling(final.day/7))
+  data.week <- subset(data.week,
+                      (data.week[,1] < final.year) |
+                        (data.week[,1] == final.year & data.week[,2] < final.month) |
+                        (data.week[,1] == final.year & data.week[,2] == final.month &
+                           data.week[,3] <= final.quasiweek))
+  message("Done. Just ensure the last quasi-week is complete.
+  The last day of your series is ", final.day, " and TS is ", TS)
 
-  weekly_sum <- na.omit(weekly_sum)
-  out_name <- paste0("PPE.at.TS", TS)
-  weekly_sum <- weekly_sum[, c("Year", "Month", "quasiWeek", out_name)]
+  class(data.week) <- union("TSaggreg", class(data.week))
 
-  # --- Ensure numeric matrix output (compatible with SPIChange format) ---
-  out <- as.matrix(weekly_sum)
-  storage.mode(out) <- "numeric"
-  colnames(out) <- c("Year", "Month", "quasiWeek", out_name)
-
-  message("Done. Ensure the last quasi-week is complete. ",
-          "Last day = ", final.day, ", TS = ", TS)
-
-  class(out) <- union("TSaggreg", class(out))
-  return(out)
+  return(data.week)
 }
 
-#' Validate and parse date input
-#' @keywords internal
+#' Check User Input Dates for Validity
+#'
+#' @param x User entered date value
+#' @return Validated date string as a `Date` object.
+#' @note This was taken from \CRANpkg{nasapower}, but tz changed to UTC.
+#' @example .check_date(x)
+#' @author Adam H. Sparks \email{adamhsparks@@gmail.com}
+#' @keywords Internal
+#' @noRd
 .check_date <- function(x) {
-  parsed <- tryCatch(
-    parse_date_time(x,
-                    orders = c("Ymd", "dmY", "mdY", "BdY", "Bdy", "bdY", "bdy"),
-                    tz = "UTC"),
-    error = function(e) stop("Invalid date format: ", x)
+  tryCatch(
+    x <- parse_date_time(x,
+                         c(
+                           "Ymd",
+                           "dmY",
+                           "mdY",
+                           "BdY",
+                           "Bdy",
+                           "bdY",
+                           "bdy"
+                         ),
+                         tz = "UTC"),
+    warning = function(c) {
+      stop(
+        call. = FALSE,
+        "\n`",
+        x,
+        "` is not in a valid date format. Please enter a valid date format.",
+        "\n"
+      )
+    }
   )
-  as.Date(parsed)
+  return(as.Date(x))
 }

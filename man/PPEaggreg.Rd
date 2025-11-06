@@ -2,13 +2,13 @@
 % Please edit documentation in R/PPEaggreg.R
 \name{PPEaggreg}
 \alias{PPEaggreg}
-\title{Aggregate daily precipitation minus potential evapotranspiration (P-PE)
+\title{Aggregate daily precipitation minus potential evapotranspiration (P - PE)
 totals at quasi-week time scales}
 \usage{
 PPEaggreg(daily.PPE, start.date, TS = 4L)
 }
 \arguments{
-\item{daily.PPE}{Numeric vector, 1-column matrix, or data frame with daily P-PE totals.}
+\item{daily.PPE}{Numeric vector, 1-column matrix, or data frame with daily P - PE totals.}
 
 \item{start.date}{Date at which the aggregation should start.
 Accepts most common formats (e.g., "YYYY-MM-DD", "YYYY/MM/DD").}
@@ -21,7 +21,7 @@ A numeric matrix with columns:
 Year, Month, quasiWeek, and PPE.at.TS.
 }
 \description{
-Aggregate daily precipitation minus potential evapotranspiration (P-PE)
+Aggregate daily precipitation minus potential evapotranspiration (P - PE)
 totals at quasi-week time scales
 }
 \details{
@@ -29,11 +29,10 @@ This function divides each month into four fixed quasi-week periods:
 days 1–7, 8–14, 15–21, and 22–end of month. This yields 48 quasi-week
 intervals per year, independent of the aggregation scale.
 When \code{TS = 4}, the function computes rolling sums of four consecutive
-quasi-weekly totals (≈ one month).
+quasi-weekly totals, which aligns with the widely used one month time scale.
 }
 \examples{
-\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
-daily.PPE <- CampinasPPE[, 2]
-PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1980-01-01", TS = 4)
-\dontshow{\}) # examplesIf}
+daily.PPE <- Campinas[, 11]
+PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+
 }
