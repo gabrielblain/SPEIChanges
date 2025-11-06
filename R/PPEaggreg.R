@@ -19,7 +19,7 @@
 #'
 #' @examples
 #' daily.PPE <- Campinas[, 11]
-#' PPE_TS4 <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+#' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #'
 #' @importFrom lubridate year month day parse_date_time
 #' @importFrom zoo rollsum
