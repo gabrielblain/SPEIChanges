@@ -1,4 +1,4 @@
-#' Reference Evapotranspiration Using the Penman and Monteith Method
+#' Potential Evapotranspiration Using the Penman and Monteith Method
 #'
 #' Calculates daily reference evapotranspiration amounts using the Penman and
 #'  Monteith method. This function is imported from the
