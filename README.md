@@ -50,22 +50,160 @@ You can install the development version of SPEIChanges from
 pak::pak("gabrielblain/SPEIChanges")
 ```
 
-## Example
+## Basic Instructions
 
-This is a basic example which shows a basic use of the two most
-important package’s functions:
+### Loading the packages
+
+To use the package, first load it into your R session with:
 
 ``` r
 library(SPEIChanges)
+# This will also load the required dependencies
+```
+
+### Loading dataset from Campinas, state of Sao Paulo, Brazil
+
+The package includes a sample dataset containing daily meteorological
+data including precipitation, potential evapotranspiration and the
+difference between them (P - PE). To load the dataset, use the following
+command:
+
+``` r
+data(Campinas)
+head(Campinas)
+#>         Date  Tavg  Tmax  Tmin   WS    RH       Ra       Rn  Rain       PE
+#> 1 01/01/1995 22.90 27.16 19.81 2.31 86.00 44.14692 13.30339  7.14 3.583251
+#> 2 02/01/1995 21.61 24.99 19.23 1.74 90.45 44.12867 13.39148 19.15 3.406381
+#> 3 03/01/1995 21.78 24.62 19.58 2.04 89.11 44.10818 13.65543 22.88 3.484567
+#> 4 04/01/1995 22.04 25.30 19.71 1.79 90.94 44.08545 11.57560 13.39 2.995245
+#> 5 05/01/1995 22.25 25.48 18.91 1.48 89.27 44.06045 14.81535  5.60 3.822785
+#> 6 06/01/1995 23.41 27.66 19.84 2.32 85.87 44.03317 21.63854  1.32 5.413021
+#>         PPE
+#> 1  3.556749
+#> 2 15.743619
+#> 3 19.395433
+#> 4 10.394755
+#> 5  1.777215
+#> 6 -4.093021
+```
+
+### Aggregating daily P - PE data at a specified time scale.
+
+To aggregate daily P - PE data at quasi-week time scales, use the
+`PPEaggreg` function. This function requires a numeric vector or matrix
+of daily P - PE values, a start date, and the desired time scale (TS) in
+quasi-weeks. The default TS is 4, which corresponds to a monthly scale.
+
+``` r
 daily.PPE <- Campinas[, 11]
 PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #> Done. Just ensure the last quasi-week is complete.
 #>   The last day of your series is 31 and TS is 4
-Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5)
-#> Warning in SPEIChanges(PPE.at.TS = PPE.at.TS, nonstat.models = 5): Less than 30
-#> years of P - PE records. Longer periods are highly recommended.
-#> Fitting the GEV-based models to each quasi-weekly series...
-#>   |                                                                              |                                                                      |   0%  |                                                                              |=                                                                     |   2%  |                                                                              |===                                                                   |   4%  |                                                                              |====                                                                  |   6%  |                                                                              |======                                                                |   8%  |                                                                              |=======                                                               |  10%  |                                                                              |=========                                                             |  12%  |                                                                              |==========                                                            |  15%  |                                                                              |============                                                          |  17%  |                                                                              |=============                                                         |  19%  |                                                                              |===============                                                       |  21%  |                                                                              |================                                                      |  23%  |                                                                              |==================                                                    |  25%  |                                                                              |===================                                                   |  27%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  31%  |                                                                              |=======================                                               |  33%  |                                                                              |=========================                                             |  35%  |                                                                              |==========================                                            |  38%  |                                                                              |============================                                          |  40%  |                                                                              |=============================                                         |  42%  |                                                                              |===============================                                       |  44%  |                                                                              |================================                                      |  46%  |                                                                              |==================================                                    |  48%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================                                  |  52%  |                                                                              |======================================                                |  54%  |                                                                              |=======================================                               |  56%  |                                                                              |=========================================                             |  58%  |                                                                              |==========================================                            |  60%  |                                                                              |============================================                          |  62%  |                                                                              |=============================================                         |  65%  |                                                                              |===============================================                       |  67%  |                                                                              |================================================                      |  69%  |                                                                              |==================================================                    |  71%  |                                                                              |===================================================                   |  73%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================                |  77%  |                                                                              |=======================================================               |  79%  |                                                                              |=========================================================             |  81%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  85%  |                                                                              |=============================================================         |  88%  |                                                                              |===============================================================       |  90%  |                                                                              |================================================================      |  92%  |                                                                              |==================================================================    |  94%  |                                                                              |===================================================================   |  96%  |                                                                              |===================================================================== |  98%  |                                                                              |======================================================================| 100%
+head(PPE.at.TS)
+#>      Year Month quasiWeek PPE.at.TS4
+#> [1,] 1995     1         4   123.3181
+#> [2,] 1995     2         1   242.7979
+#> [3,] 1995     2         2   299.9392
+#> [4,] 1995     2         3   382.2785
+#> [5,] 1995     2         4   289.6011
+#> [6,] 1995     3         1   122.4033
+```
+
+### Calculating SPEI changes using nonstationary models
+
+To calculate SPEI changes using nonstationary models, use the
+`SPEIChanges` function. This function requires the aggregated P - PE
+data and the number of nonstationary models to fit (1 to 5 nonstationary
+models). The function will return a list containing the SPEI values and
+the fitted nonstationary models.
+
+``` r
+Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5))
+head(Changes_SPEI$Changes.Freq.Drought)
+#>      Month quasiWeek Model StatNormalPPE NonStatNormalPPE ChangeMod ChangeSev
+#> [1,]     1         1     2         56.44           -18.55     30.86     20.41
+#> [2,]     1         2     2         70.95            11.12     24.63     15.85
+#> [3,]     1         3     2         80.60            36.15     18.94     12.34
+#> [4,]     1         4     1        107.38           107.38      0.00      0.00
+#> [5,]     2         1     2         74.48            29.53     16.08     10.42
+#> [6,]     2         2     1         31.46            31.46      0.00      0.00
+#>      ChangeExt      Loc1      Loc2 Loc3       Sc1 Sc2         Sh
+#> [1,]     10.39 112.82624 -5.348278    0 66.783789   0 -0.1711248
+#> [2,]      7.84 106.97920 -4.123974    0 66.524342   0 -0.1478110
+#> [3,]      6.36 102.58037 -3.102375    0 65.829483   0 -0.1356829
+#> [4,]      0.00  76.99595  0.000000    0 90.708482   0 -0.4993217
+#> [5,]      5.38  93.78819 -3.089325    0 80.164848   0 -0.1828098
+#> [6,]      0.00  30.85675  0.000000    0  4.274043   0 -6.3806172
+head(Changes_SPEI$data.week)
+#>   Year Month quasiWeek PPE.at.TS  SPEI Exp.Acum.Prob Actual.Acum.Prob
+#> 1 1995     1         4   123.318 0.187         0.574            0.574
+#> 2 1995     2         1   242.798 1.680         0.954            0.907
+#> 3 1995     2         2   299.939 3.000         0.999            0.999
+#> 4 1995     2         3   382.278 2.733         0.997            0.994
+#> 5 1995     2         4   289.601 2.440         0.993            0.983
+#> 6 1995     3         1   122.403 1.209         0.887            0.760
+#>   ChangeDryFreq
+#> 1     NoDrought
+#> 2     NoDrought
+#> 3     NoDrought
+#> 4     NoDrought
+#> 5     NoDrought
+#> 6     NoDrought
+```
+
+## Auxiliary functions
+
+The package also includes auxiliary functions such as `ET0_HS.R`,
+`ET0_PM.R`, and `ET0_PT.R`. These functions may be used for calculating
+daily potential Evapotranspiration rate, using Hargreaves-Samani, Penman
+and Monteith, and Preistley-Taylor methods. respectively.
+
+``` r
+# Example of using ET0_HS function
+Tavg <- Campinas[, 2]
+Tmax <- Campinas[, 3]
+Tmin <- Campinas[, 4]
+Ra <- Campinas[, 7]
+ET0_HS_values <- ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+head(ET0_HS_values) 
+#>           ET0
+#> [1,] 4.572989
+#> [2,] 3.918323
+#> [3,] 3.679357
+#> [4,] 3.898363
+#> [5,] 4.246155
+#> [6,] 4.763736
+# Example of using ET0_PM function
+Rn <- Campinas[, 8]
+WS <- Campinas[, 5]
+RH <- Campinas[, 6]
+ET0_PM_values <- ET0_PM(Tavg = Tavg,
+       Tmax = Tmax,
+       Tmin = Tmin,
+       Rn = Rn,
+       RH = RH,
+       WS = WS,
+       Alt = 658)
+#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
+head(ET0_PM_values)
+#>        ET0_PM
+#> [1,] 3.583251
+#> [2,] 3.406381
+#> [3,] 3.484567
+#> [4,] 2.995245
+#> [5,] 3.822785
+#> [6,] 5.413021
+# Example of using ET0_PT function
+ET0_PT_values <- ET0_PT(Tavg = Tavg, Rn = Rn)
+#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
+head(ET0_PT_values)
+#>         ET0_PT
+#> [1,]  6.831958
+#> [2,]  6.876447
+#> [3,]  7.012089
+#> [4,]  5.955282
+#> [5,]  7.522152
+#> [6,] 10.842309
 ```
 
 ## References

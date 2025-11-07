@@ -58,15 +58,69 @@ You can install the development version of SPEIChanges from [GitHub](https://git
 pak::pak("gabrielblain/SPEIChanges")
 ```
 
-## Example
+## Basic Instructions
 
-This is a basic example which shows a basic use of the two most important package's functions:
+### Loading the packages
 
-```{r example}
+To use the package, first load it into your R session with:
+```{r load}
 library(SPEIChanges)
+# This will also load the required dependencies
+```
+
+### Loading dataset from Campinas, state of Sao Paulo, Brazil
+The package includes a sample dataset containing daily meteorological data including precipitation, potential evapotranspiration and the difference between them (P - PE). To load the dataset, use the following command:  
+
+```{r dataset}
+data(Campinas)
+head(Campinas)
+```
+
+### Aggregating daily P - PE data at a specified time scale.
+To aggregate daily P - PE data at quasi-week time scales, use the `PPEaggreg` function. This function requires a numeric vector or matrix of daily P - PE values, a start date, and the desired time scale (TS) in quasi-weeks. The default TS is 4, which corresponds to a monthly scale.
+
+```{r PPEaggreg}
 daily.PPE <- Campinas[, 11]
 PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
-Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5)
+head(PPE.at.TS)
+```
+
+### Calculating SPEI changes using nonstationary models
+To calculate SPEI changes using nonstationary models, use the `SPEIChanges` function. This function requires the aggregated P - PE data and the number of nonstationary models to fit (1 to 5 nonstationary models). The function will return a list containing the SPEI values and the fitted nonstationary models.
+
+```{r SPEIChanges}
+Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5))
+head(Changes_SPEI$Changes.Freq.Drought)
+head(Changes_SPEI$data.week)
+```
+
+## Auxiliary functions
+
+The package also includes auxiliary functions such as `ET0_HS.R`, `ET0_PM.R`, and `ET0_PT.R`. These functions may be used for calculating daily potential Evapotranspiration rate, using Hargreaves-Samani, Penman and Monteith, and Preistley-Taylor methods. respectively.
+
+```{r daily PET}
+# Example of using ET0_HS function
+Tavg <- Campinas[, 2]
+Tmax <- Campinas[, 3]
+Tmin <- Campinas[, 4]
+Ra <- Campinas[, 7]
+ET0_HS_values <- ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+head(ET0_HS_values) 
+# Example of using ET0_PM function
+Rn <- Campinas[, 8]
+WS <- Campinas[, 5]
+RH <- Campinas[, 6]
+ET0_PM_values <- ET0_PM(Tavg = Tavg,
+       Tmax = Tmax,
+       Tmin = Tmin,
+       Rn = Rn,
+       RH = RH,
+       WS = WS,
+       Alt = 658)
+head(ET0_PM_values)
+# Example of using ET0_PT function
+ET0_PT_values <- ET0_PT(Tavg = Tavg, Rn = Rn)
+head(ET0_PT_values)
 ```
 
 ## References
