@@ -21,7 +21,7 @@
 #' daily.PPE <- Campinas[, 11]
 #' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #'
-#' @importFrom lubridate year month day parse_date_time
+#' @importFrom lubridate year month day
 #' @importFrom zoo rollsum
 #' @importFrom stats na.omit
 #' @export
@@ -45,7 +45,7 @@ PPEaggreg <- function(daily.PPE, start.date, TS = 4L) {
   if (n < 10950) {
     warning("Less than 30 years of P-PE records. Longer periods are highly recommended.")
   }
-  start.cycle <- .check_date(start.date)
+  start.cycle <- check_date(start.date)
   end.cycle <- start.cycle + (n - 1)
   all.period <- seq(start.cycle, end.cycle, "days")
   years <- year(all.period)
@@ -124,39 +124,4 @@ PPEaggreg <- function(daily.PPE, start.date, TS = 4L) {
   class(data.week) <- union("TSaggreg", class(data.week))
 
   return(data.week)
-}
-
-#' Check User Input Dates for Validity
-#'
-#' @param x User entered date value
-#' @return Validated date string as a `Date` object.
-#' @note This was taken from \CRANpkg{nasapower}, but tz changed to UTC.
-#' @example .check_date(x)
-#' @author Adam H. Sparks \email{adamhsparks@@gmail.com}
-#' @keywords Internal
-#' @noRd
-.check_date <- function(x) {
-  tryCatch(
-    x <- parse_date_time(x,
-                         c(
-                           "Ymd",
-                           "dmY",
-                           "mdY",
-                           "BdY",
-                           "Bdy",
-                           "bdY",
-                           "bdy"
-                         ),
-                         tz = "UTC"),
-    warning = function(c) {
-      stop(
-        call. = FALSE,
-        "\n`",
-        x,
-        "` is not in a valid date format. Please enter a valid date format.",
-        "\n"
-      )
-    }
-  )
-  return(as.Date(x))
 }
