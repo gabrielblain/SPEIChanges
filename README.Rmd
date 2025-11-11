@@ -96,7 +96,13 @@ head(Changes_SPEI$data.week)
 
 ## Auxiliary functions
 
-The package also includes auxiliary functions such as `ET0_HS.R`, `ET0_PM.R`, and `ET0_PT.R`. These functions may be used for calculating daily potential Evapotranspiration rate, using Hargreaves-Samani, Penman and Monteith, and Preistley-Taylor methods. respectively.
+The package also includes auxiliary functions such as `Ra.R`, `ET0_HS.R`, `ET0_PM.R`, and `ET0_PT.R`. These functions may be used for calculating daily extraterrestrial solar radiation and potential Evapotranspiration rates, using Hargreaves-Samani, Penman and Monteith, and Preistley-Taylor methods. respectively.
+
+```{r daily Ra}
+# Example of using Ra function
+daily.Ra <- Ra(lat = -23, start.date = "1995-01-01", end.date = "1995-01-10")
+head(daily.Ra)
+```
 
 ```{r daily PET}
 # Example of using ET0_HS function
