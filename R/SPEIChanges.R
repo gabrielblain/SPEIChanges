@@ -116,7 +116,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
     time <- as.matrix(seq(1:n.week))
 
     t.gev <- quiet(tryCatch(summary(
-      fevd(PPE.week, method = "GMLE", type = "GEV"),
+      fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
       error = function(e) NULL
     )))
     models <- quiet(Fit.Models(PPE.week, time,nonstat.models))
@@ -124,7 +124,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
     selected.model <- models$selected.model
     quasiprob <- (
       pevd(PPE.week, loc = t.gev$par[1],
-           scale = t.gev$par[2],
+           scale = exp(t.gev$par[2]),
            shape = t.gev$par[3],
            type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
     )
@@ -144,8 +144,8 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
       Changes.Freq.Drought[a, 5] <- Changes.Freq.Drought[a, 4]
       Changes.Freq.Drought[a, 6:8] <- 0
     } else {
-      loc <- models$loc <- models$parms[1] + (models$parms[2]*time) + (models$parms[3]*(time^2))
-      sc <- models$parms[4] + (models$parms[5]*time)
+      loc <- models$parms[1] + (models$parms[2]*time) + (models$parms[3]*(time^2))
+      sc <- exp(models$parms[4] + (models$parms[5]*time))
       sh <- models$parms[6]
       for (i in 1:n.week){
         quasiprob.ns[i] <- pevd(PPE.week[i], loc = loc[i],
@@ -240,52 +240,52 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
     t.gevs <- list(
       # Stationary
       t.gev = summary(tryCatch(
-        fevd(PPE.week, method = "GMLE", type = "GEV"),
+        fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
         error = function(e) NULL
       )),
       # Nonstationary in location only
       t.gev.ns10 = summary(tryCatch(
         fevd(PPE.week, method = "GMLE", type = "GEV",
-             location.fun = ~ time),
+             location.fun = ~ time, use.phi = TRUE),
         error = function(e) NULL
       )))} else if (nonstat.models == 2){
         t.gevs <- list(
           # Stationary
           t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV"),
+            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
             error = function(e) NULL
           )),
           # Nonstationary in location only
           t.gev.ns10 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time),
+                 location.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
           # Nonstationary in scale only
           t.gev.ns01 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )))
       } else if (nonstat.models == 3){
         t.gevs <- list(
           # Stationary
           t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV"),
+            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in location only
           t.gev.ns10 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time),
+                 location.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in scale only
           t.gev.ns01 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
@@ -293,7 +293,7 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
           t.gev.ns11 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time,
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           ))
         )
@@ -301,21 +301,21 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
         t.gevs <- list(
           # Stationary
           t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV"),
+            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in location only
           t.gev.ns10 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time),
+                 location.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in scale only
           t.gev.ns01 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
@@ -323,14 +323,14 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
           t.gev.ns11 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time,
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
           # polynomial degree two in location only
           t.gev.ns20 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time + I(time^2),
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           ))
         )
@@ -338,21 +338,21 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
         t.gevs <- list(
           # Stationary
           t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV"),
+            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in location only
           t.gev.ns10 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time),
+                 location.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
           # Nonstationary in scale only
           t.gev.ns01 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
 
@@ -360,21 +360,21 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
           t.gev.ns11 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time,
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           )),
           # polynomial degree two in location only
           t.gev.ns20 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time + I(time^2),
-                 scale.fun = ~ time),
+                 use.phi = TRUE),
             error = function(e) NULL
           )),
           # polynomial degree two in location and linear in scale
           t.gev.ns21 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time + I(time^2),
-                 scale.fun = ~ time),
+                 scale.fun = ~ time, use.phi = TRUE),
             error = function(e) NULL
           ))
         )
