@@ -24,6 +24,7 @@
 #'   \item{Changes.Freq.Drought}{The non-stationary  GEV-based model that best fits the P - PE series,
 #'    the expected P - PE amounts describing normal conditions under both stationary and non-stationary
 #'    approaches, and the changes in the frequency of moderate to extreme, severe to extreme and extreme drought events}
+#'    \item{GEV.parameters}{Parameters of the best fitting GEV model (location, scale and shape) for each quasi-week.}
 #'  }
 #' @examplesIf interactive()
 #' daily.PPE <- Campinas[, 11]
@@ -93,11 +94,13 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
   years <- PPE.at.TS[,1]
   months <- PPE.at.TS[,2]
   data.week <- data.frame(matrix(NA, length(PPE.at.TS[, 1]), 8))
+  GEV.parameters <- data.frame(matrix(NA, length(PPE.at.TS[, 1]), 5))
   data.week[,1:4] <- PPE.at.TS
   data.week <- data.week[order(data.week[,2],data.week[,3]),]
+  GEV.parameters[,1:2] <- data.week[,2:3]
   month <- 1
   week <- 1
-  Changes.Freq.Drought <- matrix(NA,48,14)
+  Changes.Freq.Drought <- matrix(NA,48,8)
 
   for (a in 1:48) {
     # updating progress bar
@@ -119,12 +122,12 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
       fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
       error = function(e) NULL
     )))
-    models <- quiet(Fit.Models(PPE.week, time,nonstat.models))
+    models <- quiet(Fit.Models(PPE.week, time,nonstat.models,n.week))
     Changes.Freq.Drought[a, 3] <- models$best
     selected.model <- models$selected.model
     quasiprob <- (
       pevd(PPE.week, loc = t.gev$par[1],
-           scale = exp(t.gev$par[2]),
+           scale = t.gev$par[2],
            shape = t.gev$par[3],
            type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
     )
@@ -144,20 +147,20 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
       Changes.Freq.Drought[a, 5] <- Changes.Freq.Drought[a, 4]
       Changes.Freq.Drought[a, 6:8] <- 0
     } else {
-      loc <- models$parms[1] + (models$parms[2]*time) + (models$parms[3]*(time^2))
-      sc <- exp(models$parms[4] + (models$parms[5]*time))
-      sh <- models$parms[6]
+      #loc <- models$loc <- models$parms[1] + (models$parms[2]*time) + (models$parms[3]*(time^2))
+      #sc <- models$parms[4] + (models$parms[5]*time)
+      #sh <- models$parms[6]
       for (i in 1:n.week){
-        quasiprob.ns[i] <- pevd(PPE.week[i], loc = loc[i],
-                                scale = sc[i],
-                                shape = sh,
+        quasiprob.ns[i] <- pevd(PPE.week[i], loc = models$loc[i],
+                                scale = models$scale[i],
+                                shape = models$shape[i],
                                 type = c("GEV"), lower.tail = TRUE, log.p = FALSE)}
       Changes.Freq.Drought[a, 4] <- round(stat.PPE.exp[1],2)
-      Changes.Freq.Drought [a,5] <- round(qevd(0.5, loc = loc[n.week],
-                                               scale = sc[n.week],
-                                               shape = sh,
+      Changes.Freq.Drought [a,5] <- round(qevd(0.5, loc = models$loc[n.week],
+                                               scale = models$scale[n.week],
+                                               shape = models$shape[n.week],
                                                type = c("GEV"), lower.tail = TRUE),2)
-      actual.nsprob <- pevd(stat.PPE.exp, loc = loc[n.week], scale = sc[n.week], shape = sh,
+      actual.nsprob <- pevd(stat.PPE.exp, loc = models$loc[n.week], scale = models$scale[n.week], shape = models$shape[n.week],
                             type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
       Changes.Freq.Drought [a,6] <- round(100 *(actual.nsprob[2]-0.159),2)
 
@@ -166,16 +169,14 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
       Changes.Freq.Drought [a,8] <- round(100 *(actual.nsprob[4]-0.023),2)
     }
 
-    Changes.Freq.Drought[a, 9] <- models$parms[1]
-    Changes.Freq.Drought[a, 10] <- models$parms[2]
-    Changes.Freq.Drought[a, 11] <- models$parms[3]
-    Changes.Freq.Drought[a, 12] <- models$parms[4]
-    Changes.Freq.Drought[a, 13] <- models$parms[5]
-    Changes.Freq.Drought[a, 14] <- models$parms[6]
-
     quasiprob.ns[quasiprob.ns < 0.001351] <- 0.001351
     quasiprob.ns[quasiprob.ns > 0.998649] <- 0.998649
     data.week[initial.row:last.row,7] <- quasiprob.ns
+
+    GEV.parameters[initial.row:last.row, 3] <- models$loc
+    GEV.parameters[initial.row:last.row, 4] <- models$scale
+    GEV.parameters[initial.row:last.row, 5] <- models$shape
+
     week <- week + 1
     if (week == 5)
     {
@@ -209,13 +210,17 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
     "NonStatNormalPPE",
     "ChangeMod",
     "ChangeSev",
-    "ChangeExt",
-    "Loc1","Loc2","Loc3", "Sc1","Sc2", "Sh"
+    "ChangeExt"
   )
+  colnames(GEV.parameters) <- c(
+    "Month",
+    "quasiWeek",
+    "Location","Scale","Shape")
 
   Drought_Changes <- list(
     data.week = data.week,
-    Changes.Freq.Drought = Changes.Freq.Drought
+    Changes.Freq.Drought = Changes.Freq.Drought,
+    GEV.parameters = GEV.parameters
   )
   return(Drought_Changes)
 }
@@ -225,11 +230,12 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
 #' @param PPE.week Numeric vector of (rainfall - PET)
 #' @param time Numeric vector (same length as PPE.week)
 #' @param nonstat.models single integer value indicating the number of nonstationary models to be fitted (from 1 to 5)
+#' @param n.week Integer value indicating the length of PPE.week
 #' @note This version uses the \CRANpkg{extRemes} package with GMLE estimation.
 #' @noRd
 #' @keywords Internal
 
-Fit.Models <- function(PPE.week, time,nonstat.models) {
+Fit.Models <- function(PPE.week, time,nonstat.models,n.week) {
   # Ensure data are finite
   valid <- is.finite(PPE.week) & is.finite(time)
   PPE.week <- PPE.week[valid]
@@ -330,7 +336,7 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
           t.gev.ns20 = summary(tryCatch(
             fevd(PPE.week, method = "GMLE", type = "GEV",
                  location.fun = ~ time + I(time^2),
-                 scale.fun = ~ time, use.phi = TRUE),
+                 use.phi = TRUE),
             error = function(e) NULL
           ))
         )
@@ -393,17 +399,35 @@ Fit.Models <- function(PPE.week, time,nonstat.models) {
   best <- which.min(aics)
   selected.model <- t.gevs[[best]]
   if (best == 1)
-  {parms <- c(selected.model$par[1],0,0,selected.model$par[2],0,selected.model$par[3])}
+  {loc <- rep(as.numeric(selected.model$par[1]),n.week)
+  scale <- rep(as.numeric(selected.model$par[2]),n.week)
+  shape <- rep(as.numeric(selected.model$par[3]),n.week)}
+  #parms <- c(selected.model$par[1],0,0,selected.model$par[2],0,selected.model$par[3])}
   else if (best == 2)
-  {parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],0,selected.model$par[4])}
+  {loc <- selected.model$par[1] + selected.model$par[2]*time
+  scale <- rep(as.numeric(selected.model$par[3]),n.week)
+  shape <- rep(as.numeric(selected.model$par[4]),n.week)}
+  #parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],0,selected.model$par[4])}
   else if (best == 3)
-  {parms <- c(selected.model$par[1],0,0,selected.model$par[2],selected.model$par[3],0,selected.model$par[4])}
+  {loc <- rep(as.numeric(selected.model$par[1]),n.week)
+  scale <- exp(selected.model$par[2] + selected.model$par[3]*time)
+  shape <- rep(as.numeric(selected.model$par[4]),n.week)}
+  #parms <- c(selected.model$par[1],0,0,selected.model$par[2],selected.model$par[3],0,selected.model$par[4])}
   else if (best == 4)
-  {parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],selected.model$par[4],selected.model$par[5])}
+  {loc <- selected.model$par[1] + selected.model$par[2]*time
+  scale <- exp(selected.model$par[3] + selected.model$par[4]*time)
+  shape <- rep(as.numeric(selected.model$par[5]),n.week)}
+  #parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],selected.model$par[4],selected.model$par[5])}
   else if (best == 5)
-  {parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],0,selected.model$par[5])}
+  {loc <- selected.model$par[1] + selected.model$par[2]*time + selected.model$par[3]*time^2
+  scale <- rep(as.numeric(selected.model$par[4]),n.week)
+  shape <- rep(as.numeric(selected.model$par[5]),n.week)}
+  #parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],0,selected.model$par[5])}
   else
-  {parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],selected.model$par[5],selected.model$par[6])}
+  {loc <- selected.model$par[1] + selected.model$par[2]*time + selected.model$par[3]*time^2
+  scale <- exp(selected.model$par[4] + selected.model$par[5]*time)
+  shape <- rep(as.numeric(selected.model$par[6]),n.week)}
+  #parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],selected.model$par[5],selected.model$par[6])}
 
-  return(list(selected.model = selected.model, best = best, parms = parms))
+  return(list(selected.model = selected.model, best = best, loc = loc, scale = scale, shape = shape))
 }

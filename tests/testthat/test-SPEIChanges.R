@@ -1,4 +1,3 @@
-
 # Setup mock input data similar to PPEaggreg output
 set.seed(123)
 n <- 48 * 32  # 32 years, 48 quasi-weeks per year
@@ -16,9 +15,10 @@ class(input.mat) <- c("TSaggreg", "matrix")
 test_that("SPEIChanges returns expected list structure", {
   result <- suppressWarnings(SPEIChanges(input.mat))
   expect_true(is.list(result))
-  expect_named(result, c("data.week", "Changes.Freq.Drought"))
+  expect_named(result, c("data.week", "Changes.Freq.Drought", "GEV.parameters"))
   expect_true(is.data.frame(result$data.week))
   expect_true(is.matrix(result$Changes.Freq.Drought))
+  expect_true(is.data.frame(result$GEV.parameters))
 })
 
 test_that("Input validation errors for PPE.at.TS class", {
@@ -67,17 +67,27 @@ test_that("SPEIChanges returns consistent output dimensions and names", {
                     "ChangeDryFreq") %in% names(result$data.week)))
 
   # Check Changes.Freq.Drought structure
-  expect_equal(ncol(result$Changes.Freq.Drought), 14)
+  expect_equal(ncol(result$Changes.Freq.Drought), 8)
   expect_true(all(c("Month", "quasiWeek", "Model", "StatNormalPPE",
-                    "NonStatNormalPPE", "ChangeMod", "ChangeSev", "ChangeExt",
-                    "Loc1", "Loc2", "Loc3", "Sc1", "Sc2", "Sh")
+                    "NonStatNormalPPE", "ChangeMod", "ChangeSev", "ChangeExt")
                   %in% colnames(result$Changes.Freq.Drought)))
+
+  # Check new GEV.parameters structure
+  expect_true(is.data.frame(result$GEV.parameters))
+  expect_true(all(c("Month",
+                    "quasiWeek",
+                    "Location","Scale","Shape") %in% colnames(result$GEV.parameters)))
+
+  # All scale parameters must be positive
+  expect_true(all(result$GEV.parameters$Sc1 > 0))
+  expect_true(all(result$GEV.parameters$Sc2 > 0))
 })
+
 test_that("SPEIChanges handles nonstat.models parameter correctly", {
   for (model in 1:5) {
     result <- suppressWarnings(SPEIChanges(input.mat, nonstat.models = model))
     expect_true(is.list(result))
-    expect_named(result, c("data.week", "Changes.Freq.Drought"))
+    expect_named(result, c("data.week", "Changes.Freq.Drought", "GEV.parameters"))
   }
 })
 
@@ -89,8 +99,21 @@ test_that("SPEIChanges produces physically consistent probabilities and SPEI val
   expect_true(all(dw$Exp.Acum.Prob > 0 & dw$Exp.Acum.Prob < 1))
   expect_true(all(dw$Actual.Acum.Prob > 0 & dw$Actual.Acum.Prob < 1))
 
-  # SPEI is finite and approximately normal
+  # SPEI is finite and roughly centered near zero
   expect_true(all(is.finite(dw$SPEI)))
-  expect_true(abs(mean(dw$SPEI)) < 0.2)   # Roughly centered near 0
+  expect_true(abs(mean(dw$SPEI)) < 0.2)
 })
 
+test_that("GEV.parameters contains realistic values", {
+  result <- suppressWarnings(SPEIChanges(input.mat, nonstat.models = 1))
+  gp <- result$GEV.parameters
+
+  # Expected number of rows (12 months × 4 quasi-weeks)
+  expect_equal(nrow(gp), 1536)
+
+  # Shape parameter in typical range (-1, 1)
+  expect_true(all(gp$Sh > -1 & gp$Sh < 1))
+
+  # No missing values
+  expect_false(anyNA(gp))
+})

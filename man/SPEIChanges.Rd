@@ -33,6 +33,7 @@ and the changes in the frequency of below zero SPEI values caused by the changes
 \item{Changes.Freq.Drought}{The non-stationary  GEV-based model that best fits the P - PE series,
 the expected P - PE amounts describing normal conditions under both stationary and non-stationary
 approaches, and the changes in the frequency of moderate to extreme, severe to extreme and extreme drought events}
+\item{GEV.parameters}{Parameters of the best fitting GEV model (location, scale and shape) for each quasi-week.}
 }
 }
 \description{
