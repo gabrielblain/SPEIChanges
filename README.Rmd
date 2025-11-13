@@ -92,6 +92,7 @@ To calculate SPEI changes using nonstationary models, use the `SPEIChanges` func
 Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5))
 head(Changes_SPEI$Changes.Freq.Drought)
 head(Changes_SPEI$data.week)
+head(Changes_SPEI$GEV.parameters)
 ```
 
 ## Auxiliary functions
