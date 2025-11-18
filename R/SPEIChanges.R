@@ -330,10 +330,10 @@ Fit.Models <- function(PPE.week, time,nonstat.models,n.week) {
       scale <- rep(as.numeric(selected.model$mle[3]),n.week)
       shape <- rep(as.numeric(selected.model$mle[4]),n.week)} else if (best == 3) {
         loc <- rep(as.numeric(selected.model$mle[1]),n.week)
-        scale <- exp(selected.model$mle[2] + selected.model$mle[3]*time)
+        scale <- selected.model$mle[2] + selected.model$mle[3]*time
         shape <- rep(as.numeric(selected.model$mle[4]),n.week)} else {
           loc <- selected.model$mle[1] + selected.model$mle[2]*time
-          scale <- exp(selected.model$mle[3] + selected.model$mle[4]*time)
+          scale <- selected.model$mle[3] + selected.model$mle[4]*time
           shape <- rep(as.numeric(selected.model$mle[5]),n.week)}
   return(list(selected.model = selected.model, best = best, loc = loc, scale = scale, shape = shape))
   }
