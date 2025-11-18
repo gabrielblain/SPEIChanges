@@ -84,7 +84,7 @@ test_that("SPEIChanges returns consistent output dimensions and names", {
 })
 
 test_that("SPEIChanges handles nonstat.models parameter correctly", {
-  for (model in 1:5) {
+  for (model in 1:3) {
     result <- suppressWarnings(SPEIChanges(input.mat, nonstat.models = model))
     expect_true(is.list(result))
     expect_named(result, c("data.week", "Changes.Freq.Drought", "GEV.parameters"))

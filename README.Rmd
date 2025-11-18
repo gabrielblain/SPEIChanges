@@ -47,7 +47,7 @@ designed to isolate the effect of such changes on the central tendency
 and dispersion of the SPEI frequency distributions.
 
 The package depends on R (\>= 3.5) and imports the following packages:
-{CropWaterBalance}, {lubridate}, {zoo}, {extRemes}, {spsUtil}, {stats}, and {utils}.
+{CropWaterBalance},{ismev},  {lubridate}, {zoo}, {extRemes}, {spsUtil}, {stats}, and {utils}.
 
 ## Installation
 
@@ -89,7 +89,7 @@ head(PPE.at.TS)
 To calculate SPEI changes using nonstationary models, use the `SPEIChanges` function. This function requires the aggregated P - PE data and the number of nonstationary models to fit (1 to 5 nonstationary models). The function will return a list containing the SPEI values and the fitted nonstationary models.
 
 ```{r SPEIChanges}
-Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5))
+Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 3))
 head(Changes_SPEI$Changes.Freq.Drought)
 head(Changes_SPEI$data.week)
 head(Changes_SPEI$GEV.parameters)

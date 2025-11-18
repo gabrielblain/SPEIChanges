@@ -12,8 +12,6 @@
 #' If 1, only stationary and nonstationary (linear) in location models are fitted (2 candidates).
 #' If 2, a nonstationary (linear) in scale model is included (3 candidates).
 #' If 3, a nonstationary (linear) in both location and scale models is included (4 candidates).
-#' If 4, a nonstationary (polynomial 2nd degree) in location model is included (5 candidates).
-#' If 5, a nonstationary (polynomial 2nd degree) in location and linear in scale model is included (6 candidates).
 #' Default is 1.
 #' @returns
 #' A `list` object with:
@@ -30,7 +28,8 @@
 #' daily.PPE <- Campinas[, 11]
 #' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #' Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 1)
-#' @importFrom extRemes fevd pevd qevd
+#' @importFrom extRemes pevd qevd
+#' @importFrom ismev gev.fit
 #' @importFrom spsUtil quiet
 #' @importFrom stats qnorm
 #' @importFrom utils txtProgressBar setTxtProgressBar
@@ -42,8 +41,8 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
   }
 
   if (length(nonstat.models) != 1 || !is.numeric(nonstat.models) ||
-      !(nonstat.models %in% 1:5)) {
-    stop("`nonstat.models` must be a single integer value between 1 and 5.")
+      !(nonstat.models %in% 1:3)) {
+    stop("`nonstat.models` must be a single integer value between 1 and 3.")
   }
 
   if (!is.numeric(PPE.at.TS) || anyNA(PPE.at.TS) ||
@@ -118,26 +117,28 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
     }
     time <- as.matrix(seq(1:n.week))
 
-    t.gev <- quiet(tryCatch(summary(
-      fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-      error = function(e) NULL
-    )))
+    t.gev <- quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
+                                    mulink = identity, siglink = identity, shlink = identity,
+                                    muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                    method = "Nelder-Mead", maxit = 10000),
+                            error = function(e) NULL
+    ))
     models <- quiet(Fit.Models(PPE.week, time,nonstat.models,n.week))
     Changes.Freq.Drought[a, 3] <- models$best
     selected.model <- models$selected.model
     quasiprob <- (
-      pevd(PPE.week, loc = t.gev$par[1],
-           scale = t.gev$par[2],
-           shape = t.gev$par[3],
+      pevd(PPE.week, loc = t.gev$mle[1],
+           scale = t.gev$mle[2],
+           shape = t.gev$mle[3],
            type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
     )
     quasiprob[quasiprob < 0.001351] <- 0.001351
     quasiprob[quasiprob > 0.998649] <- 0.998649
     data.week[initial.row:last.row, 6] <- quasiprob
 
-    stat.PPE.exp <- qevd(c(0.5,0.159,0.067,0.023), loc = t.gev$par[1],
-                         scale = t.gev$par[2],
-                         shape = t.gev$par[3],
+    stat.PPE.exp <- qevd(c(0.5,0.159,0.067,0.023), loc = t.gev$mle[1],
+                         scale = t.gev$mle[2],
+                         shape = t.gev$mle[3],
                          type = c("GEV"), lower.tail = TRUE)
     Changes.Freq.Drought[a, 1] <- month
     Changes.Freq.Drought[a, 2] <- week
@@ -147,9 +148,6 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
       Changes.Freq.Drought[a, 5] <- Changes.Freq.Drought[a, 4]
       Changes.Freq.Drought[a, 6:8] <- 0
     } else {
-      #loc <- models$loc <- models$parms[1] + (models$parms[2]*time) + (models$parms[3]*(time^2))
-      #sc <- models$parms[4] + (models$parms[5]*time)
-      #sh <- models$parms[6]
       for (i in 1:n.week){
         quasiprob.ns[i] <- pevd(PPE.week[i], loc = models$loc[i],
                                 scale = models$scale[i],
@@ -182,7 +180,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
     {
       month <- month + 1
       week <- 1}
-  } #Aqui fecha o for
+  }
 
   close(pb)
   data.week[,5] <- c(qnorm(data.week[,6], mean = 0, sd = 1))
@@ -229,9 +227,9 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1){
 #'
 #' @param PPE.week Numeric vector of (rainfall - PET)
 #' @param time Numeric vector (same length as PPE.week)
-#' @param nonstat.models single integer value indicating the number of nonstationary models to be fitted (from 1 to 5)
+#' @param nonstat.models single integer value indicating the number of nonstationary models to be fitted (from 1 to 3)
 #' @param n.week Integer value indicating the length of PPE.week
-#' @note This version uses the \CRANpkg{extRemes} package with GMLE estimation.
+#' @note This version uses the \CRANpkg{ismev} package with MLE estimation.
 #' @noRd
 #' @keywords Internal
 
@@ -245,189 +243,97 @@ Fit.Models <- function(PPE.week, time,nonstat.models,n.week) {
   if (nonstat.models == 1){
     t.gevs <- list(
       # Stationary
-      t.gev = summary(tryCatch(
-        fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-        error = function(e) NULL
+      t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
+                                     mulink = identity, siglink = identity, shlink = identity,
+                                     muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                     method = "Nelder-Mead", maxit = 10000),
+                             error = function(e) NULL
       )),
       # Nonstationary in location only
-      t.gev.ns10 = summary(tryCatch(
-        fevd(PPE.week, method = "GMLE", type = "GEV",
-             location.fun = ~ time, use.phi = TRUE),
-        error = function(e) NULL
+      t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
+                                          mulink = identity, siglink = identity, shlink = identity,
+                                          muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                          method = "Nelder-Mead", maxit = 10000),
+                                  error = function(e) NULL
       )))} else if (nonstat.models == 2){
         t.gevs <- list(
           # Stationary
-          t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-            error = function(e) NULL
+          t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
+                                         mulink = identity, siglink = identity, shlink = identity,
+                                         muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                         method = "Nelder-Mead", maxit = 10000),
+                                 error = function(e) NULL
           )),
           # Nonstationary in location only
-          t.gev.ns10 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
+          t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
+                                              mulink = identity, siglink = identity, shlink = identity,
+                                              muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                              method = "Nelder-Mead", maxit = 10000),
+                                      error = function(e) NULL
           )),
           # Nonstationary in scale only
-          t.gev.ns01 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
+          t.gev.ns01 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = 1, shl = NULL,
+                                              mulink = identity, siglink = identity, shlink = identity,
+                                              muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                              method = "Nelder-Mead", maxit = 10000),
+                                      error = function(e) NULL
           )))
-      } else if (nonstat.models == 3){
+      } else {
         t.gevs <- list(
           # Stationary
-          t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-            error = function(e) NULL
+          t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
+                                         mulink = identity, siglink = identity, shlink = identity,
+                                         muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                         method = "Nelder-Mead", maxit = 10000),
+                                 error = function(e) NULL
           )),
-
           # Nonstationary in location only
-          t.gev.ns10 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
+          t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
+                                              mulink = identity, siglink = identity, shlink = identity,
+                                              muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                              method = "Nelder-Mead", maxit = 10000),
+                                      error = function(e) NULL
           )),
-
           # Nonstationary in scale only
-          t.gev.ns01 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
+          t.gev.ns01 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = 1, shl = NULL,
+                                              mulink = identity, siglink = identity, shlink = identity,
+                                              muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                              method = "Nelder-Mead", maxit = 10000),
+                                      error = function(e) NULL
           )),
-
           # Nonstationary in both location and scale
-          t.gev.ns11 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time,
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          ))
-        )
-      } else if (nonstat.models == 4){
-        t.gevs <- list(
-          # Stationary
-          t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in location only
-          t.gev.ns10 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in scale only
-          t.gev.ns01 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in both location and scale
-          t.gev.ns11 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time,
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-          # polynomial degree two in location only
-          t.gev.ns20 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time + I(time^2),
-                 use.phi = TRUE),
-            error = function(e) NULL
-          ))
-        )
-      } else{
-        t.gevs <- list(
-          # Stationary
-          t.gev = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV", use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in location only
-          t.gev.ns10 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in scale only
-          t.gev.ns01 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-
-          # Nonstationary in both location and scale
-          t.gev.ns11 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time,
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
-          )),
-          # polynomial degree two in location only
-          t.gev.ns20 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time + I(time^2),
-                 use.phi = TRUE),
-            error = function(e) NULL
-          )),
-          # polynomial degree two in location and linear in scale
-          t.gev.ns21 = summary(tryCatch(
-            fevd(PPE.week, method = "GMLE", type = "GEV",
-                 location.fun = ~ time + I(time^2),
-                 scale.fun = ~ time, use.phi = TRUE),
-            error = function(e) NULL
+          t.gev.ns11 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = 1, shl = NULL,
+                                              mulink = identity, siglink = identity, shlink = identity,
+                                              muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                              method = "Nelder-Mead", maxit = 10000),
+                                      error = function(e) NULL
           ))
         )
       }
+
   # Select best model based on AICc
   aics <- c(
-    t.gevs$t.gev$AIC,
-    t.gevs$t.gev.ns10$AIC,
-    t.gevs$t.gev.ns01$AIC,
-    t.gevs$t.gev.ns11$AIC,
-    t.gevs$t.gev.ns20$AIC,
-    t.gevs$t.gev.ns21$AIC
+    (2 * 3 + 2 *t.gevs$t.gev$nllh) + (2 * 3 * (3 + 1)) / (n.week - 3 - 1),
+    (2 * 4 + 2 *t.gevs$t.gev.ns10$nllh) + (2 * 4 * (4 + 1)) / (n.week - 4 - 1),
+    (2 * 4 + 2 *t.gevs$t.gev.ns01$nllh) + (2 * 4 * (4 + 1)) / (n.week - 4 - 1),
+    (2 * 5 + 2 *t.gevs$t.gev.ns11$nllh) + (2 * 5 * (5 + 1)) / (n.week - 5 - 1)
   )
 
   # Find the index of the minimum AIC
   best <- which.min(aics)
   selected.model <- t.gevs[[best]]
-  if (best == 1)
-  {loc <- rep(as.numeric(selected.model$par[1]),n.week)
-  scale <- rep(as.numeric(selected.model$par[2]),n.week)
-  shape <- rep(as.numeric(selected.model$par[3]),n.week)}
-  #parms <- c(selected.model$par[1],0,0,selected.model$par[2],0,selected.model$par[3])}
-  else if (best == 2)
-  {loc <- selected.model$par[1] + selected.model$par[2]*time
-  scale <- rep(as.numeric(selected.model$par[3]),n.week)
-  shape <- rep(as.numeric(selected.model$par[4]),n.week)}
-  #parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],0,selected.model$par[4])}
-  else if (best == 3)
-  {loc <- rep(as.numeric(selected.model$par[1]),n.week)
-  scale <- exp(selected.model$par[2] + selected.model$par[3]*time)
-  shape <- rep(as.numeric(selected.model$par[4]),n.week)}
-  #parms <- c(selected.model$par[1],0,0,selected.model$par[2],selected.model$par[3],0,selected.model$par[4])}
-  else if (best == 4)
-  {loc <- selected.model$par[1] + selected.model$par[2]*time
-  scale <- exp(selected.model$par[3] + selected.model$par[4]*time)
-  shape <- rep(as.numeric(selected.model$par[5]),n.week)}
-  #parms <- c(selected.model$par[1],selected.model$par[2],0,selected.model$par[3],selected.model$par[4],selected.model$par[5])}
-  else if (best == 5)
-  {loc <- selected.model$par[1] + selected.model$par[2]*time + selected.model$par[3]*time^2
-  scale <- rep(as.numeric(selected.model$par[4]),n.week)
-  shape <- rep(as.numeric(selected.model$par[5]),n.week)}
-  #parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],0,selected.model$par[5])}
-  else
-  {loc <- selected.model$par[1] + selected.model$par[2]*time + selected.model$par[3]*time^2
-  scale <- exp(selected.model$par[4] + selected.model$par[5]*time)
-  shape <- rep(as.numeric(selected.model$par[6]),n.week)}
-  #parms <- c(selected.model$par[1],selected.model$par[2],selected.model$par[3],selected.model$par[4],selected.model$par[5],selected.model$par[6])}
-
+  if (best == 1) {
+    loc <- rep(as.numeric(selected.model$mle[1]),n.week)
+    scale <- rep(as.numeric(selected.model$mle[2]),n.week)
+    shape <- rep(as.numeric(selected.model$mle[3]),n.week)} else if (best == 2) {
+      loc <- selected.model$mle[1] + selected.model$mle[2]*time
+      scale <- rep(as.numeric(selected.model$mle[3]),n.week)
+      shape <- rep(as.numeric(selected.model$mle[4]),n.week)} else if (best == 3) {
+        loc <- rep(as.numeric(selected.model$mle[1]),n.week)
+        scale <- exp(selected.model$mle[2] + selected.model$mle[3]*time)
+        shape <- rep(as.numeric(selected.model$mle[4]),n.week)} else {
+          loc <- selected.model$mle[1] + selected.model$mle[2]*time
+          scale <- exp(selected.model$mle[3] + selected.model$mle[4]*time)
+          shape <- rep(as.numeric(selected.model$mle[5]),n.week)}
   return(list(selected.model = selected.model, best = best, loc = loc, scale = scale, shape = shape))
-}
+  }

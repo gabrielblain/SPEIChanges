@@ -37,8 +37,8 @@ al. (2025), designed to isolate the effect of such changes on the
 central tendency and dispersion of the SPEI frequency distributions.
 
 The package depends on R (\>= 3.5) and imports the following packages:
-{CropWaterBalance}, {lubridate}, {zoo}, {extRemes}, {spsUtil}, {stats},
-and {utils}.
+{CropWaterBalance},{ismev}, {lubridate}, {zoo}, {extRemes}, {spsUtil},
+{stats}, and {utils}.
 
 ## Installation
 
@@ -118,28 +118,28 @@ models). The function will return a list containing the SPEI values and
 the fitted nonstationary models.
 
 ``` r
-Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 5))
+Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 3))
 head(Changes_SPEI$Changes.Freq.Drought)
 #>      Month quasiWeek Model StatNormalPPE NonStatNormalPPE ChangeMod ChangeSev
 #> [1,]     1         1     2         56.36           -18.88     30.92     20.45
 #> [2,]     1         2     2         70.88             8.98     25.84     16.97
 #> [3,]     1         3     2         80.55            34.31     20.04     13.38
-#> [4,]     1         4     6        106.61             2.74     39.64     24.22
+#> [4,]     1         4     1        106.61           106.61      0.00      0.00
 #> [5,]     2         1     2         74.15            29.13     16.12     10.45
 #> [6,]     2         2     1         31.61            31.61      0.00      0.00
 #>      ChangeExt
 #> [1,]     10.40
 #> [2,]      8.63
 #> [3,]      7.12
-#> [4,]      8.87
+#> [4,]      0.00
 #> [5,]      5.41
 #> [6,]      0.00
 head(Changes_SPEI$data.week)
 #>   Year Month quasiWeek PPE.at.TS  SPEI Exp.Acum.Prob Actual.Acum.Prob
-#> 1 1995     1         4   123.318 0.202         0.580            0.586
+#> 1 1995     1         4   123.318 0.202         0.580            0.580
 #> 2 1995     2         1   242.798 1.683         0.954            0.906
 #> 3 1995     2         2   299.939 3.000         0.999            0.999
-#> 4 1995     2         3   382.278 2.737         0.997            0.991
+#> 4 1995     2         3   382.278 2.737         0.997            0.993
 #> 5 1995     2         4   289.601 2.438         0.993            0.983
 #> 6 1995     3         1   122.403 1.211         0.887            0.744
 #>   ChangeDryFreq

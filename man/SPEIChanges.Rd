@@ -20,8 +20,6 @@ nonstationary models to be considered in the drought assessments (from 1 to 5).
 If 1, only stationary and nonstationary (linear) in location models are fitted (2 candidates).
 If 2, a nonstationary (linear) in scale model is included (3 candidates).
 If 3, a nonstationary (linear) in both location and scale models is included (4 candidates).
-If 4, a nonstationary (polynomial 2nd degree) in location model is included (5 candidates).
-If 5, a nonstationary (polynomial 2nd degree) in location and linear in scale model is included (6 candidates).
 Default is 1.}
 }
 \value{
