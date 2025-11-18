@@ -113,7 +113,7 @@ head(PPE.at.TS)
 
 To calculate SPEI changes using nonstationary models, use the
 `SPEIChanges` function. This function requires the aggregated P - PE
-data and the number of nonstationary models to fit (1 to 5 nonstationary
+data and the number of nonstationary models to fit (1 to 3 nonstationary
 models). The function will return a list containing the SPEI values and
 the fitted nonstationary models.
 
@@ -121,27 +121,27 @@ the fitted nonstationary models.
 Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 3))
 head(Changes_SPEI$Changes.Freq.Drought)
 #>      Month quasiWeek Model StatNormalPPE NonStatNormalPPE ChangeMod ChangeSev
-#> [1,]     1         1     2         56.36           -18.88     30.92     20.45
-#> [2,]     1         2     2         70.88             8.98     25.84     16.97
-#> [3,]     1         3     2         80.55            34.31     20.04     13.38
-#> [4,]     1         4     1        106.61           106.61      0.00      0.00
-#> [5,]     2         1     2         74.15            29.13     16.12     10.45
-#> [6,]     2         2     1         31.61            31.61      0.00      0.00
+#> [1,]     1         1     4         67.17             9.59     19.01     13.35
+#> [2,]     1         2     2         83.00            19.55     21.90     11.09
+#> [3,]     1         3     2         87.55            37.56     19.47     12.35
+#> [4,]     1         4     2        113.22            58.09     15.09      6.89
+#> [5,]     2         1     2         87.27            45.76     11.62      6.12
+#> [6,]     2         2     2         69.50           -10.84     29.70     19.06
 #>      ChangeExt
-#> [1,]     10.40
-#> [2,]      8.63
-#> [3,]      7.12
-#> [4,]      0.00
-#> [5,]      5.41
-#> [6,]      0.00
+#> [1,]      8.94
+#> [2,]      3.76
+#> [3,]      6.39
+#> [4,]      2.29
+#> [5,]      2.48
+#> [6,]      9.95
 head(Changes_SPEI$data.week)
 #>   Year Month quasiWeek PPE.at.TS  SPEI Exp.Acum.Prob Actual.Acum.Prob
-#> 1 1995     1         4   123.318 0.202         0.580            0.580
-#> 2 1995     2         1   242.798 1.683         0.954            0.906
-#> 3 1995     2         2   299.939 3.000         0.999            0.999
-#> 4 1995     2         3   382.278 2.737         0.997            0.993
-#> 5 1995     2         4   289.601 2.438         0.993            0.983
-#> 6 1995     3         1   122.403 1.211         0.887            0.744
+#> 1 1995     1         4   123.318 0.121         0.548            0.308
+#> 2 1995     2         1   242.798 2.286         0.989            0.941
+#> 3 1995     2         2   299.939 2.669         0.996            0.988
+#> 4 1995     2         3   382.278 2.792         0.997            0.996
+#> 5 1995     2         4   289.601 2.441         0.993            0.983
+#> 6 1995     3         1   122.403 1.351         0.912            0.748
 #>   ChangeDryFreq
 #> 1     NoDrought
 #> 2     NoDrought
@@ -150,13 +150,13 @@ head(Changes_SPEI$data.week)
 #> 5     NoDrought
 #> 6     NoDrought
 head(Changes_SPEI$GEV.parameters)
-#>   Month quasiWeek  Location    Scale      Shape
-#> 1     1         1 108.02215 66.82375 -0.1712404
-#> 2     1         1 102.64194 66.82375 -0.1712404
-#> 3     1         1  97.26174 66.82375 -0.1712404
-#> 4     1         1  91.88153 66.82375 -0.1712404
-#> 5     1         1  86.50132 66.82375 -0.1712404
-#> 6     1         1  81.12112 66.82375 -0.1712404
+#>   Month quasiWeek Location    Scale      Shape
+#> 1     1         1 133.8268 91.45840 -0.8614181
+#> 2     1         1 128.4407 91.21200 -0.8614181
+#> 3     1         1 123.0546 90.96561 -0.8614181
+#> 4     1         1 117.6684 90.71922 -0.8614181
+#> 5     1         1 112.2823 90.47282 -0.8614181
+#> 6     1         1 106.8962 90.22643 -0.8614181
 ```
 
 ## Auxiliary functions

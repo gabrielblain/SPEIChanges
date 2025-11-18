@@ -86,7 +86,7 @@ head(PPE.at.TS)
 ```
 
 ### Calculating SPEI changes using nonstationary models
-To calculate SPEI changes using nonstationary models, use the `SPEIChanges` function. This function requires the aggregated P - PE data and the number of nonstationary models to fit (1 to 5 nonstationary models). The function will return a list containing the SPEI values and the fitted nonstationary models.
+To calculate SPEI changes using nonstationary models, use the `SPEIChanges` function. This function requires the aggregated P - PE data and the number of nonstationary models to fit (1 to 3 nonstationary models). The function will return a list containing the SPEI values and the fitted nonstationary models.
 
 ```{r SPEIChanges}
 Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 3))
