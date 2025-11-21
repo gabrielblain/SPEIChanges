@@ -23,6 +23,7 @@ Imports:
     extRemes,
     ismev,
     lubridate,
+    rlang,
     spsUtil,
     stats,
     utils,
