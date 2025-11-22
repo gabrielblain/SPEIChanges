@@ -28,7 +28,7 @@
 #'    approaches, and the changes in the frequency of moderate to extreme, severe to extreme and extreme drought events}
 #'    \item{GEV.parameters}{Parameters of the best fitting GEV model (location, scale and shape) for each quasi-week.}
 #'  }
-#' @examples #If interactive()
+#' @examples
 #' daily.PPE <- Campinas[, 11]
 #' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #' Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 1)

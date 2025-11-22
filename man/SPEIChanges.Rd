@@ -42,7 +42,6 @@ approaches, and the changes in the frequency of moderate to extreme, severe to e
 Detect trends and quantify their effect on the probability of SPEI values occurring
 }
 \examples{
-#If interactive()
 daily.PPE <- Campinas[, 11]
 PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 1)
