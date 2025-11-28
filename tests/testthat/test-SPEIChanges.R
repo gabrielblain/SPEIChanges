@@ -102,6 +102,7 @@ test_that("SPEIChanges produces physically consistent probabilities and SPEI val
   # SPEI is finite and roughly centered near zero
   expect_true(all(is.finite(dw$SPEI)))
   expect_true(abs(mean(dw$SPEI)) < 0.2)
+  expect_true(sd(dw$SPEI) > 0.8 & sd(dw$SPEI) < 1.2)
 })
 
 test_that("GEV.parameters contains realistic values", {

@@ -121,7 +121,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "BIC"){
       last.row <- n.week
     }
     time <- as.matrix(seq(1:n.week))
-
+    time <- (time - min(time)) / (max(time) - min(time))
     t.gev <- quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
                                     mulink = identity, siglink = identity, shlink = identity,
                                     muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
