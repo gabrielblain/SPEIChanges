@@ -69,22 +69,15 @@ difference between them (P - PE). To load the dataset, use the following
 command:
 
 ``` r
-data(Campinas)
-head(Campinas)
-#>         Date  Tavg  Tmax  Tmin   WS    RH       Ra       Rn  Rain       PE
-#> 1 01/01/1995 22.90 27.16 19.81 2.31 86.00 44.14692 13.30339  7.14 3.583251
-#> 2 02/01/1995 21.61 24.99 19.23 1.74 90.45 44.12867 13.39148 19.15 3.406381
-#> 3 03/01/1995 21.78 24.62 19.58 2.04 89.11 44.10818 13.65543 22.88 3.484567
-#> 4 04/01/1995 22.04 25.30 19.71 1.79 90.94 44.08545 11.57560 13.39 2.995245
-#> 5 05/01/1995 22.25 25.48 18.91 1.48 89.27 44.06045 14.81535  5.60 3.822785
-#> 6 06/01/1995 23.41 27.66 19.84 2.32 85.87 44.03317 21.63854  1.32 5.413021
-#>         PPE
-#> 1  3.556749
-#> 2 15.743619
-#> 3 19.395433
-#> 4 10.394755
-#> 5  1.777215
-#> 6 -4.093021
+data(Campinas_daily)
+head(Campinas_daily)
+#>        dates years month days rain tmin tmax   PE   PPE julian.day
+#> 1 1890-01-01  1890     1    1  0.3 16.6 24.4 4.43 -4.13          1
+#> 2 1890-01-02  1890     1    2  9.0 15.9 28.4 5.85  3.15          2
+#> 3 1890-01-03  1890     1    3  2.0 16.5 28.9 5.90 -3.90          3
+#> 4 1890-01-04  1890     1    4 47.0 18.0 30.4 6.12 40.88          4
+#> 5 1890-01-05  1890     1    5 29.0 17.3 28.8 5.73 23.27          5
+#> 6 1890-01-06  1890     1    6 32.0 18.0 25.9 4.62 27.38          6
 ```
 
 ### Aggregating daily P - PE data at a specified time scale.
@@ -95,18 +88,18 @@ of daily P - PE values, a start date, and the desired time scale (TS) in
 quasi-weeks. The default TS is 4, which corresponds to a monthly scale.
 
 ``` r
-daily.PPE <- Campinas[, 11]
-PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+daily.PPE <- Campinas_daily[,9]
+PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1890-01-01", TS = 4)
 #> Done. Just ensure the last quasi-week is complete.
 #>   The last day of your series is 31 and TS is 4
 head(PPE.at.TS)
 #>      Year Month quasiWeek PPE.at.TS4
-#> [1,] 1995     1         4   123.3181
-#> [2,] 1995     2         1   242.7979
-#> [3,] 1995     2         2   299.9392
-#> [4,] 1995     2         3   382.2785
-#> [5,] 1995     2         4   289.6011
-#> [6,] 1995     3         1   122.4033
+#> [1,] 1890     1         4     155.03
+#> [2,] 1890     2         1      -1.74
+#> [3,] 1890     2         2      78.97
+#> [4,] 1890     2         3      53.69
+#> [5,] 1890     2         4      75.98
+#> [6,] 1890     3         1      65.11
 ```
 
 ### Calculating SPEI changes using nonstationary models
@@ -121,42 +114,42 @@ the fitted nonstationary models.
 Changes_SPEI <- spsUtil::quiet(SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 3))
 head(Changes_SPEI$Changes.Freq.Drought)
 #>      Month quasiWeek Model StatNormalPPE NonStatNormalPPE ChangeMod ChangeSev
-#> [1,]     1         1     4         67.17             9.59     19.01     13.35
-#> [2,]     1         2     2         83.00            19.55     21.90     11.09
-#> [3,]     1         3     2         87.55            37.56     19.47     12.35
-#> [4,]     1         4     2        113.22            58.09     15.09      6.89
-#> [5,]     2         1     2         87.27            45.76     11.62      6.12
-#> [6,]     2         2     2         69.50           -10.84     29.70     19.06
+#> [1,]     1         1     1         51.28            51.28         0         0
+#> [2,]     1         2     1         63.08            63.08         0         0
+#> [3,]     1         3     1         71.79            71.79         0         0
+#> [4,]     1         4     1         70.59            70.59         0         0
+#> [5,]     2         1     1         66.47            66.47         0         0
+#> [6,]     2         2     1         56.99            56.99         0         0
 #>      ChangeExt
-#> [1,]      8.94
-#> [2,]      3.76
-#> [3,]      6.39
-#> [4,]      2.29
-#> [5,]      2.48
-#> [6,]      9.95
+#> [1,]         0
+#> [2,]         0
+#> [3,]         0
+#> [4,]         0
+#> [5,]         0
+#> [6,]         0
 head(Changes_SPEI$data.week)
-#>   Year Month quasiWeek PPE.at.TS  SPEI Exp.Acum.Prob Actual.Acum.Prob
-#> 1 1995     1         4   123.318 0.121         0.548            0.308
-#> 2 1995     2         1   242.798 2.286         0.989            0.941
-#> 3 1995     2         2   299.939 2.669         0.996            0.988
-#> 4 1995     2         3   382.278 2.792         0.997            0.996
-#> 5 1995     2         4   289.601 2.441         0.993            0.983
-#> 6 1995     3         1   122.403 1.351         0.912            0.748
+#>   Year Month quasiWeek PPE.at.TS   SPEI Exp.Acum.Prob Actual.Acum.Prob
+#> 1 1890     1         4    155.03  0.763         0.777            0.777
+#> 2 1890     2         1     -1.74 -0.723         0.235            0.235
+#> 3 1890     2         2     78.97  0.212         0.584            0.584
+#> 4 1890     2         3     53.69  0.075         0.530            0.422
+#> 5 1890     2         4     75.98  0.359         0.640            0.525
+#> 6 1890     3         1     65.11  0.408         0.658            0.563
 #>   ChangeDryFreq
 #> 1     NoDrought
-#> 2     NoDrought
+#> 2             0
 #> 3     NoDrought
 #> 4     NoDrought
 #> 5     NoDrought
 #> 6     NoDrought
 head(Changes_SPEI$GEV.parameters)
 #>   Month quasiWeek Location    Scale      Shape
-#> 1     1         1 133.8268 91.45840 -0.8614181
-#> 2     1         1 128.4407 91.21200 -0.8614181
-#> 3     1         1 123.0546 90.96561 -0.8614181
-#> 4     1         1 117.6684 90.71922 -0.8614181
-#> 5     1         1 112.2823 90.47282 -0.8614181
-#> 6     1         1 106.8962 90.22643 -0.8614181
+#> 1     1         1   18.486 91.99713 -0.1515757
+#> 2     1         1   18.486 91.99713 -0.1515757
+#> 3     1         1   18.486 91.99713 -0.1515757
+#> 4     1         1   18.486 91.99713 -0.1515757
+#> 5     1         1   18.486 91.99713 -0.1515757
+#> 6     1         1   18.486 91.99713 -0.1515757
 ```
 
 ## Auxiliary functions
@@ -182,50 +175,19 @@ head(daily.Ra)
 
 ``` r
 # Example of using ET0_HS function
-Tavg <- Campinas[, 2]
-Tmax <- Campinas[, 3]
-Tmin <- Campinas[, 4]
-Ra <- Campinas[, 7]
-ET0_HS_values <- ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+Tmax <- Campinas_daily[, 7]
+Tmin <- Campinas_daily[, 6]
+Tavg <- (Tmax + Tmin)/2
+Ra <-  Ra(lat = -23, start.date = "1890-01-01", end.date = "2024-12-31")
+ET0_HS_values <- ET0_HS(Ra = Ra[,2], Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
 head(ET0_HS_values) 
 #>           ET0
-#> [1,] 4.572989
-#> [2,] 3.918323
-#> [3,] 3.679357
-#> [4,] 3.898363
-#> [5,] 4.246155
-#> [6,] 4.763736
-# Example of using ET0_PM function
-Rn <- Campinas[, 8]
-WS <- Campinas[, 5]
-RH <- Campinas[, 6]
-ET0_PM_values <- ET0_PM(Tavg = Tavg,
-       Tmax = Tmax,
-       Tmin = Tmin,
-       Rn = Rn,
-       RH = RH,
-       WS = WS,
-       Alt = 658)
-#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
-head(ET0_PM_values)
-#>        ET0_PM
-#> [1,] 3.583251
-#> [2,] 3.406381
-#> [3,] 3.484567
-#> [4,] 2.995245
-#> [5,] 3.822785
-#> [6,] 5.413021
-# Example of using ET0_PT function
-ET0_PT_values <- ET0_PT(Tavg = Tavg, Rn = Rn)
-#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
-head(ET0_PT_values)
-#>         ET0_PT
-#> [1,]  6.831958
-#> [2,]  6.876447
-#> [3,]  7.012089
-#> [4,]  5.955282
-#> [5,]  7.522152
-#> [6,] 10.842309
+#> [1,] 4.292629
+#> [2,] 5.665974
+#> [3,] 5.718420
+#> [4,] 5.927336
+#> [5,] 5.548954
+#> [6,] 4.472733
 ```
 
 ## References
