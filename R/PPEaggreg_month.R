@@ -27,11 +27,18 @@
 #' @export
 PPEaggreg_month <- function(monthly.PPE, start.year, start.month = 1L, TS) {
 
-  monthly.PPE <- as.matrix(monthly.PPE)
-  if (!is.numeric(monthly.PPE) || anyNA(monthly.PPE) ||
-      ncol(monthly.PPE) != 1) {
-    stop("Physically impossible or missing P-PE values.")
+  if (is.matrix(monthly.PPE) || is.data.frame(monthly.PPE)) {
+    if (ncol(monthly.PPE) != 1) {
+      stop("monthly.PPE must have exactly one column.")
+    }
   }
+
+  monthly.PPE <- as.numeric(monthly.PPE)
+
+  if (!is.numeric(monthly.PPE) || anyNA(monthly.PPE)) {
+    stop("monthly.PPE must be a numeric vector with no missing values.")
+  }
+
   n <- length(monthly.PPE)
 
   if (!is.numeric(TS) ||
