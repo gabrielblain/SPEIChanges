@@ -23,10 +23,10 @@
 
 #' @examples
 #' # See `?Campinas` for more on this data set
-#' Tavg <- Campinas[, 2]
-#' Tmax <- Campinas[, 3]
-#' Tmin <- Campinas[, 4]
-#' Ra <- Campinas[, 7]
-#' ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+#' Tmax <- Campinas_daily[, 7]
+#' Tmin <- Campinas_daily[, 6]
+#' Tavg <- (Tmax + Tmin)/2
+#' Ra <-  Ra(lat = -23, start.date = "1890-01-01", end.date = "2024-12-31")
+#' ET0_HS_values <- ET0_HS(Ra = Ra[,2], Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
 #' @importFrom CropWaterBalance ET0_HS
 ET0_HS <- CropWaterBalance::ET0_HS

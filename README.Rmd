@@ -107,12 +107,27 @@ head(daily.Ra)
 
 ```{r daily PET}
 # Example of using ET0_HS function
-Tmax <- Campinas_daily[, 7]
-Tmin <- Campinas_daily[, 6]
-Tavg <- (Tmax + Tmin)/2
-Ra <-  Ra(lat = -23, start.date = "1890-01-01", end.date = "2024-12-31")
-ET0_HS_values <- ET0_HS(Ra = Ra[,2], Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+Tavg <- Campinas[, 2]
+Tmax <- Campinas[, 3]
+Tmin <- Campinas[, 4]
+Ra <- Campinas[, 7]
+ET0_HS_values <- ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
 head(ET0_HS_values) 
+# Example of using ET0_PM function
+Rn <- Campinas[, 8]
+WS <- Campinas[, 5]
+RH <- Campinas[, 6]
+ET0_PM_values <- ET0_PM(Tavg = Tavg,
+       Tmax = Tmax,
+       Tmin = Tmin,
+       Rn = Rn,
+       RH = RH,
+       WS = WS,
+       Alt = 658)
+head(ET0_PM_values)
+# Example of using ET0_PT function
+ET0_PT_values <- ET0_PT(Tavg = Tavg, Rn = Rn)
+head(ET0_PT_values)
 ```
 
 ## References

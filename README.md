@@ -175,19 +175,50 @@ head(daily.Ra)
 
 ``` r
 # Example of using ET0_HS function
-Tmax <- Campinas_daily[, 7]
-Tmin <- Campinas_daily[, 6]
-Tavg <- (Tmax + Tmin)/2
-Ra <-  Ra(lat = -23, start.date = "1890-01-01", end.date = "2024-12-31")
-ET0_HS_values <- ET0_HS(Ra = Ra[,2], Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
+Tavg <- Campinas[, 2]
+Tmax <- Campinas[, 3]
+Tmin <- Campinas[, 4]
+Ra <- Campinas[, 7]
+ET0_HS_values <- ET0_HS(Ra = Ra, Tavg = Tavg, Tmax = Tmax, Tmin = Tmin)
 head(ET0_HS_values) 
 #>           ET0
-#> [1,] 4.292629
-#> [2,] 5.665974
-#> [3,] 5.718420
-#> [4,] 5.927336
-#> [5,] 5.548954
-#> [6,] 4.472733
+#> [1,] 4.572989
+#> [2,] 3.918323
+#> [3,] 3.679357
+#> [4,] 3.898363
+#> [5,] 4.246155
+#> [6,] 4.763736
+# Example of using ET0_PM function
+Rn <- Campinas[, 8]
+WS <- Campinas[, 5]
+RH <- Campinas[, 6]
+ET0_PM_values <- ET0_PM(Tavg = Tavg,
+       Tmax = Tmax,
+       Tmin = Tmin,
+       Rn = Rn,
+       RH = RH,
+       WS = WS,
+       Alt = 658)
+#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
+head(ET0_PM_values)
+#>        ET0_PM
+#> [1,] 3.583251
+#> [2,] 3.406381
+#> [3,] 3.484567
+#> [4,] 2.995245
+#> [5,] 3.822785
+#> [6,] 5.413021
+# Example of using ET0_PT function
+ET0_PT_values <- ET0_PT(Tavg = Tavg, Rn = Rn)
+#> Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero
+head(ET0_PT_values)
+#>         ET0_PT
+#> [1,]  6.831958
+#> [2,]  6.876447
+#> [3,]  7.012089
+#> [4,]  5.955282
+#> [5,]  7.522152
+#> [6,] 10.842309
 ```
 
 ## References
