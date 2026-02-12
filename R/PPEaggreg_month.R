@@ -13,30 +13,21 @@
 #'   Year, Month, and PPE.at.TS.
 #'   The PPE.at.TS column contains the aggregated P - PE values at the specified monthly time scale.
 #' @examples
-#' set.seed(1)
-#' monthly.PPE <- rnorm(500)
-#' PPE.at.month <- PPEaggreg_month(
-#'   monthly.PPE,
-#'   start.year = 1995,
-#'   start.month = 1,
-#'   TS = 3
-#' )
+#' three_month <- PPEaggreg_month(
+#' Campinas_monthly[,7],
+#' start.year = 1890,
+#' start.month = 1,
+#' TS = 3)
 #'
 #' @importFrom lubridate year month make_date
 #' @importFrom zoo rollsum
 #' @export
 PPEaggreg_month <- function(monthly.PPE, start.year, start.month = 1L, TS) {
 
-  if (is.matrix(monthly.PPE) || is.data.frame(monthly.PPE)) {
-    if (ncol(monthly.PPE) != 1) {
-      stop("monthly.PPE must have exactly one column.")
-    }
-  }
-
-  monthly.PPE <- as.numeric(monthly.PPE)
-
-  if (!is.numeric(monthly.PPE) || anyNA(monthly.PPE)) {
-    stop("monthly.PPE must be a numeric vector with no missing values.")
+  monthly.PPE <- as.matrix(monthly.PPE)
+  if (!is.numeric(monthly.PPE) || anyNA(monthly.PPE) ||
+      ncol(monthly.PPE) != 1) {
+    stop("Physically impossible or missing P-PE values.")
   }
 
   n <- length(monthly.PPE)

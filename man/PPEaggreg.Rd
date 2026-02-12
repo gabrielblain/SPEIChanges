@@ -32,7 +32,7 @@ When \code{TS = 4}, the function computes rolling sums of four consecutive
 quasi-weekly totals, which aligns with the widely used one month time scale.
 }
 \examples{
-daily.PPE <- Campinas[, 11]
+daily.PPE <- Campinas_daily[, 9]
 PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 
 }

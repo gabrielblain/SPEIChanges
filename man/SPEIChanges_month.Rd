@@ -42,10 +42,9 @@ Detect trends and quantify their effect on the probability of monthly based SPEI
 }
 \examples{
 set.seed(1)
-monthly.PPE <- rnorm(500)
 PPE.at.month <- PPEaggreg_month(
-  monthly.PPE,
-  start.year = 1995,
+  Campinas_monthly[,7],
+  start.year = 1890,
   start.month = 1,
   TS = 3
 )
