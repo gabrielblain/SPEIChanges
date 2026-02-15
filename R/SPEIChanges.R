@@ -29,7 +29,7 @@
 #'    \item{GEV.parameters}{Parameters of the best fitting GEV model (location, scale and shape) for each quasi-week.}
 #'  }
 #' @examples
-#' daily.PPE <- Campinas_daily[, 9]
+#' daily.PPE <- Campinas[5480:10958, 9]
 #' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
 #' Changes_SPEI <- SPEIChanges(PPE.at.TS=PPE.at.TS, nonstat.models = 1)
 #' @importFrom extRemes pevd qevd
@@ -90,10 +90,14 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
   }
 
   # Print message and ensure newline so progress bar appears on the next line
-  message("Fitting the GEV-based models to each quasi-weekly series...",
-          appendLF = TRUE)
-  # create single progress bar (max = 48)
-  pb <- txtProgressBar(min = 0, max = 48, style = 3)
+  message("Fitting the GEV-based models to each quasi-wekkly-based series...")
+  show_pb <- interactive()
+  pb <- progress::progress_bar$new(
+    format = "  [:bar] :percent | quasi-week :current/:total | eta: :eta",
+    total = 48,
+    clear = FALSE,
+    width = 60
+  )
 
   years <- PPE.at.TS[,1]
   months <- PPE.at.TS[,2]
@@ -108,7 +112,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
 
   for (a in 1:48) {
     # updating progress bar
-    setTxtProgressBar(pb, a)
+    pb$tick()
     PPE.week <- (data.week[which(data.week[, 2] == month &
                                    data.week[, 3] == week), 4])
     sample.size <- length(PPE.week)
@@ -187,7 +191,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
       week <- 1}
   }
 
-  close(pb)
+  #close(pb)
   data.week[,5] <- c(qnorm(data.week[,6], mean = 0, sd = 1))
   dry.values <- which(data.week[,5] <= 0)
   wet.values <- which(data.week[,5] > 0)
