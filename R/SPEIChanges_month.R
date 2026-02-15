@@ -40,6 +40,7 @@
 #'
 #' @importFrom extRemes pevd qevd
 #' @importFrom ismev gev.fit
+#' @importFrom progress progress_bar
 #' @importFrom spsUtil quiet
 #' @importFrom stats qnorm
 #' @importFrom utils txtProgressBar setTxtProgressBar
@@ -87,10 +88,14 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
   }
 
   # Print message and ensure newline so progress bar appears on the next line
-  message("Fitting the GEV-based models to each monthly-based series...",
-          appendLF = TRUE)
-  # create single progress bar (max = 12 for 12 months)
-  pb <- txtProgressBar(min = 0, max = 12, style = 3)
+  message("Fitting the GEV-based models to each quasi-weekly series...")
+
+  pb <- progress::progress_bar$new(
+    format = "  [:bar] :percent | quasi-week :current/:total | eta: :eta",
+    total = 48,
+    clear = FALSE,
+    width = 60
+  )
 
   years <- PPE.at.TS[,1]
   months <- PPE.at.TS[,2]
@@ -103,7 +108,8 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
 
   for (month in 1:12) {
     # updating progress bar
-    setTxtProgressBar(pb, month)
+    #setTxtProgressBar(pb, month)
+    pb$tick()
     PPE.month <- (data.month[which(data.month[, 2] == month), 3])
     sample.size <- length(PPE.month)
     quasiprob.ns <- matrix(NA,sample.size,1)
@@ -175,7 +181,7 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
     GEV.parameters[initial.row:last.row, 4] <- models$shape
   }
 
-  close(pb)
+  #close(pb)
   data.month[,4] <- c(qnorm(data.month[,5], mean = 0, sd = 1))
   dry.values <- which(data.month[,6] <= 0)
   wet.values <- which(data.month[,6] > 0)

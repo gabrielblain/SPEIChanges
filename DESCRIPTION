@@ -24,6 +24,7 @@ Imports:
     ismev,
     lubridate,
     rlang,
+    progress,
     spsUtil,
     stats,
     utils,
