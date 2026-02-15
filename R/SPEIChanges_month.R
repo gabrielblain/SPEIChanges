@@ -92,7 +92,7 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
 
   pb <- progress::progress_bar$new(
     format = "  [:bar] :percent | quasi-week :current/:total | eta: :eta",
-    total = 48,
+    total = 12,
     clear = FALSE,
     width = 60
   )
