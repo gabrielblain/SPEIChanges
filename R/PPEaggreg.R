@@ -18,8 +18,8 @@
 #' quasi-weekly totals, which aligns with the widely used one month time scale.
 #'
 #' @examples
-#' daily.PPE <- Campinas_daily[, 9]
-#' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 4)
+#' daily.PPE <- Campinas[, 9]
+#' PPE.at.TS <- PPEaggreg(daily.PPE, start.date = "1995-01-01", TS = 2)
 #'
 #' @importFrom lubridate year month day
 #' @importFrom zoo rollsum
