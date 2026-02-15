@@ -88,10 +88,10 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
   }
 
   # Print message and ensure newline so progress bar appears on the next line
-  message("Fitting the GEV-based models to each quasi-weekly series...")
-
+  message("Fitting the GEV-based models to each monthly-based series...")
+  show_pb <- interactive()
   pb <- progress::progress_bar$new(
-    format = "  [:bar] :percent | quasi-week :current/:total | eta: :eta",
+    format = "  [:bar] :percent | month :current/:total | eta: :eta",
     total = 12,
     clear = FALSE,
     width = 60
@@ -107,8 +107,6 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc")
   Changes.Freq.Drought <- matrix(NA,12,7)
 
   for (month in 1:12) {
-    # updating progress bar
-    #setTxtProgressBar(pb, month)
     pb$tick()
     PPE.month <- (data.month[which(data.month[, 2] == month), 3])
     sample.size <- length(PPE.month)
