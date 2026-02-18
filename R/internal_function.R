@@ -130,7 +130,11 @@ Fit.Models <- function(PPE.week, time,nonstat.models,sample.size,criterion="BIC"
   # Extract log-likelihoods (NLLH = negative log-likelihood)
   ll <- sapply(t.gevs, function(x) if(is.null(x)) NA else -x$nllh)
   # Number of parameters (consistent with your previous definitions)
-  k <- c(3, 4, 4, 5)
+  k <- c(3, 4, 4, 5)[seq_along(t.gevs)]
+  valid_models <- !is.na(ll)
+  ll <- ll[valid_models]
+  k  <- k[valid_models]
+  t.gevs <- t.gevs[valid_models]
   if (criterion_low == "aicc"){
     # ---- Calculate AICc ------------------------------------------------------
     AICc <- (2*k - 2*ll) + (2*k*(k+1))/(sample.size - k - 1)
