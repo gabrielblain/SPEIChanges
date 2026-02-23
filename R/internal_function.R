@@ -60,14 +60,14 @@ Fit.Models <- function(PPE.week, time,nonstat.models,sample.size,criterion="BIC"
     t.gevs <- list(
       # Stationary
       t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
-                                     mulink = identity, siglink = identity, shlink = identity,
+                                     mulink = identity, siglink = exp, shlink = identity,
                                      muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                      method = "Nelder-Mead", maxit = 10000),
                              error = function(e) NULL
       )),
       # Nonstationary in location only
       t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
-                                          mulink = identity, siglink = identity, shlink = identity,
+                                          mulink = identity, siglink = exp, shlink = identity,
                                           muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                           method = "Nelder-Mead", maxit = 10000),
                                   error = function(e) NULL
@@ -75,21 +75,21 @@ Fit.Models <- function(PPE.week, time,nonstat.models,sample.size,criterion="BIC"
         t.gevs <- list(
           # Stationary
           t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
-                                         mulink = identity, siglink = identity, shlink = identity,
+                                         mulink = identity, siglink = exp, shlink = identity,
                                          muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                          method = "Nelder-Mead", maxit = 10000),
                                  error = function(e) NULL
           )),
           # Nonstationary in location only
           t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
-                                              mulink = identity, siglink = identity, shlink = identity,
+                                              mulink = identity, siglink = exp, shlink = identity,
                                               muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                               method = "Nelder-Mead", maxit = 10000),
                                       error = function(e) NULL
           )),
           # Nonstationary in scale only
           t.gev.ns01 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = 1, shl = NULL,
-                                              mulink = identity, siglink = identity, shlink = identity,
+                                              mulink = identity, siglink = exp, shlink = identity,
                                               muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                               method = "Nelder-Mead", maxit = 10000),
                                       error = function(e) NULL
@@ -98,28 +98,28 @@ Fit.Models <- function(PPE.week, time,nonstat.models,sample.size,criterion="BIC"
         t.gevs <- list(
           # Stationary
           t.gev = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
-                                         mulink = identity, siglink = identity, shlink = identity,
+                                         mulink = identity, siglink = exp, shlink = identity,
                                          muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                          method = "Nelder-Mead", maxit = 10000),
                                  error = function(e) NULL
           )),
           # Nonstationary in location only
           t.gev.ns10 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
-                                              mulink = identity, siglink = identity, shlink = identity,
+                                              mulink = identity, siglink = exp, shlink = identity,
                                               muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                               method = "Nelder-Mead", maxit = 10000),
                                       error = function(e) NULL
           )),
           # Nonstationary in scale only
           t.gev.ns01 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = 1, shl = NULL,
-                                              mulink = identity, siglink = identity, shlink = identity,
+                                              mulink = identity, siglink = exp, shlink = identity,
                                               muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                               method = "Nelder-Mead", maxit = 10000),
                                       error = function(e) NULL
           )),
           # Nonstationary in both location and scale
           t.gev.ns11 = quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = 1, sigl = 1, shl = NULL,
-                                              mulink = identity, siglink = identity, shlink = identity,
+                                              mulink = identity, siglink = exp, shlink = identity,
                                               muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                               method = "Nelder-Mead", maxit = 10000),
                                       error = function(e) NULL
@@ -145,16 +145,16 @@ Fit.Models <- function(PPE.week, time,nonstat.models,sample.size,criterion="BIC"
   selected.model <- t.gevs[[best]]
   if (best == 1) {
     loc <- rep(as.numeric(selected.model$mle[1]),sample.size)
-    scale <- rep(as.numeric(selected.model$mle[2]),sample.size)
+    scale <- rep(exp(as.numeric(selected.model$mle[2])),sample.size)
     shape <- rep(as.numeric(selected.model$mle[3]),sample.size)} else if (best == 2) {
       loc <- selected.model$mle[1] + selected.model$mle[2]*time
-      scale <- rep(as.numeric(selected.model$mle[3]),sample.size)
+      scale <- rep(exp(as.numeric(selected.model$mle[3])),sample.size)
       shape <- rep(as.numeric(selected.model$mle[4]),sample.size)} else if (best == 3) {
         loc <- rep(as.numeric(selected.model$mle[1]),sample.size)
-        scale <- selected.model$mle[2] + selected.model$mle[3]*time
+        scale <- exp(selected.model$mle[2] + selected.model$mle[3]*time)
         shape <- rep(as.numeric(selected.model$mle[4]),sample.size)} else {
           loc <- selected.model$mle[1] + selected.model$mle[2]*time
-          scale <- selected.model$mle[3] + selected.model$mle[4]*time
+          scale <- exp(selected.model$mle[3] + selected.model$mle[4]*time)
           shape <- rep(as.numeric(selected.model$mle[5]),sample.size)}
   return(list(selected.model = selected.model, best = best, loc = loc, scale = scale, shape = shape))
 }
