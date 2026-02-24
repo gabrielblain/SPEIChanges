@@ -127,7 +127,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
     time <- as.matrix(seq(1:sample.size))
     time <- (time - min(time)) / (max(time) - min(time))
     t.gev <- quiet(tryCatch(gev.fit(PPE.week, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
-                                    mulink = identity, siglink = identity, shlink = identity,
+                                    mulink = identity, siglink = exp, shlink = identity,
                                     muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
                                     method = "Nelder-Mead", maxit = 10000),
                             error = function(e) NULL
@@ -137,7 +137,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
     selected.model <- models$selected.model
     quasiprob <- (
       pevd(PPE.week, loc = t.gev$mle[1],
-           scale = t.gev$mle[2],
+           scale = exp(t.gev$mle[2]),
            shape = t.gev$mle[3],
            type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
     )
@@ -146,7 +146,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
     data.week[initial.row:last.row, 6] <- quasiprob
 
     stat.PPE.exp <- qevd(c(0.5,0.159,0.067,0.023), loc = t.gev$mle[1],
-                         scale = t.gev$mle[2],
+                         scale = exp(t.gev$mle[2]),
                          shape = t.gev$mle[3],
                          type = c("GEV"), lower.tail = TRUE)
     Changes.Freq.Drought[a, 1] <- month
