@@ -145,7 +145,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
     quasiprob[quasiprob > 0.998649] <- 0.998649
     data.week[initial.row:last.row, 6] <- quasiprob
 
-    stat.PPE.exp <- qevd(c(0.5,0.159,0.067,0.023), loc = t.gev$mle[1],
+    stat.PPE <- qevd(c(0.5,0.159,0.067,0.023), loc = t.gev$mle[1],
                          scale = t.gev$mle[2],
                          shape = t.gev$mle[3],
                          type = c("GEV"), lower.tail = TRUE)
@@ -153,7 +153,7 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
     Changes.Freq.Drought[a, 2] <- week
     if (Changes.Freq.Drought[a, 3]==1){
       quasiprob.ns <- quasiprob
-      Changes.Freq.Drought[a, 4] <- round(stat.PPE.exp[1],2)
+      Changes.Freq.Drought[a, 4] <- round(stat.PPE[1],2)
       Changes.Freq.Drought[a, 5] <- Changes.Freq.Drought[a, 4]
       Changes.Freq.Drought[a, 6:8] <- 0
     } else {
@@ -162,12 +162,12 @@ SPEIChanges <- function(PPE.at.TS, nonstat.models = 1, criterion = "AICc"){
                                 scale = models$scale[i],
                                 shape = models$shape[i],
                                 type = c("GEV"), lower.tail = TRUE, log.p = FALSE)}
-      Changes.Freq.Drought[a, 4] <- round(stat.PPE.exp[1],2)
+      Changes.Freq.Drought[a, 4] <- round(stat.PPE[1],2)
       Changes.Freq.Drought [a,5] <- round(qevd(0.5, loc = models$loc[sample.size],
                                                scale = models$scale[sample.size],
                                                shape = models$shape[sample.size],
                                                type = c("GEV"), lower.tail = TRUE),2)
-      actual.nsprob <- pevd(stat.PPE.exp, loc = models$loc[sample.size], scale = models$scale[sample.size], shape = models$shape[sample.size],
+      actual.nsprob <- pevd(stat.PPE, loc = models$loc[sample.size], scale = models$scale[sample.size], shape = models$shape[sample.size],
                             type = c("GEV"), lower.tail = TRUE, log.p = FALSE)
       Changes.Freq.Drought [a,6] <- round(100 *(actual.nsprob[2]-0.159),2)
 
