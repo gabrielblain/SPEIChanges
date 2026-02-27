@@ -9,8 +9,10 @@ Authors@R:
     person("Graciela R.", "Sobierajski", role = "aut",
            comment = c(ORCID = "0000-0002-7211-9268")),
     person("Leticia L.", "Martins", role = "aut",
-           comment = c(ORCID = "0000-0002-0299-3005"))
-  )
+           comment = c(ORCID = "0000-0002-0299-3005")),
+    person("Rafael Vinicius", "de São José", role = "aut",
+           comment = c(ORCID = "0009-0005-4522-2269"))
+           )
 Description: Improves the interpretation of the Standardized Precipitation
     Evapotranspiration Index under changing climate conditions. The package uses
     a nonstationary approach to detect trends in the difference between

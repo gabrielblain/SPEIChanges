@@ -26,6 +26,10 @@ Co-author
 Co-author  
 [ORCID 0000-0002-0299-3005](https://orcid.org/0000-0002-0299-3005)
 
+**Rafael Vinicius de São José**  
+Co-author  
+[ORCID 0009-0005-4522-2269](https://orcid.org/0009-0005-4522-2269)
+
 ## Basic Description
 
 The {SPEIChanges} package was created to detect climate changes in the
