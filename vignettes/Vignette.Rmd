@@ -1,0 +1,35 @@
+---
+title: "SPEIChanges: Assessing Changes in Drought Frequency in Oxford, UK"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+This vignette demonstrates how to use the `SPEIChanges` package to assess changes in drought frequency in Oxford, UK. We will analyze daily air temperature and rainfall data from the Radcliffe Observatory, covering the period from January 1827 to January 2020. The vignette serves as a workflow for applying the `SPEIChanges` method and interpreting its results.
+
+## Getting Started
+
+Load the library in your R session.
+
+```{r setup}
+library(SPEIChanges)
+```
+
+## Data
+The SPEIChanges method is based on the SPEI (Standardized Precipitation Evapotranspiration Index), which requires precipitation and evapotranspiration data. In this vignette, we will use the `Oxford` dataset, which contains daily air temperature and rainfall data from the Radcliffe Observatory in Oxford, UK.
+It includes columns for years, months, days, maximum and minimum daily air temperatures, and rainfall.
+
+```{r data}
+data("Oxford")
+head(Oxford)
+```
