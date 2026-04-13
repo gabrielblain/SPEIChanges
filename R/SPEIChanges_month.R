@@ -181,8 +181,8 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "BIC"){
 
   #close(pb)
   data.month[,4] <- c(qnorm(data.month[,5], mean = 0, sd = 1))
-  dry.values <- which(data.month[,6] <= 0)
-  wet.values <- which(data.month[,6] > 0)
+  dry.values <- which(data.month[,4] <= 0)
+  wet.values <- which(data.month[,4] > 0)
   data.month[dry.values,7] <- 100*round(data.month[dry.values,6]-data.month[dry.values,5],3)
   data.month[wet.values,7] <- "NoDrought"
   data.month <- data.month[order(data.month[,1]),]
@@ -195,7 +195,7 @@ SPEIChanges_month <- function(PPE.at.TS, nonstat.models = 1, criterion = "BIC"){
     "Actual.Acum.Prob",
     "ChangeDryFreq"
   )
-  data.month[,3:6] <- round(data.month[,4:6],3)
+  data.month[,3:6] <- round(data.month[,3:6],3)
   colnames(Changes.Freq.Drought) <- c(
     "Month",
     "Model",
