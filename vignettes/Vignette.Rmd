@@ -93,4 +93,42 @@ Changes_SPEI_6month <- SPEIChanges_month(PPE.at.TS=PPE_atTS6,
 ```
 ## Interpreting the results
 
-                                         
+The `SPEIChanges_month` function returns a list with: $Changes.Freq.Drought, $data.month, and $GEV.parameters. \
+
+
+- **$Changes.Freq.Drought:** This object contains the non-stationary GEV-based model that best fits the P - PE series, the expected P - PE amounts under both stationary and non-stationary approaches for normal conditions, and the frequency changes for moderate-to-extreme, severe-to-extreme, and extreme drought events. It has 12 rows (one for each month) and 6 columns. This is the package's most important output, as it identifies months where drought occurrence changes have been detected and specifies the non-stationary model describing these changes. \
+
+- **$data.month:** This object contains the P - PE amounts, SPEI values, cumulative probabilities under both stationary and non-stationary approaches, and the frequency changes in below-zero SPEI values caused by shifts in P - PE patterns. It has the same number of rows as the input data. \
+
+- **$GEV.parameters:** This object contains the time-varying parameters of the best-fitting GEV model (location, scale, and shape). If the input data has 30 years of records, this object will have 360 rows (30 years x 12 months) and 5 columns (month, year, location, scale, shape). This output is useful for understanding how the parameters of the GEV distribution evolve over time for each month. \
+
+### $Changes.Freq.Drought
+
+The `$Changes.Freq.Drought` object for the 1-month time scale shows the changes in drought frequency by month:
+
+```{r display_changes_freq, results='asis'}
+knitr::kable(Changes_SPEI_1month$Changes.Freq.Drought,
+             caption = "Changes in drought frequency by month (1-month time scale)",
+             digits = 4)
+```
+
+### $data.month
+
+The `$data.month` object for the 1-month time scale contains the following data:
+
+```{r display_data_month, results='asis'}
+knitr::kable(Changes_SPEI_1month$data.month, 
+             caption = "Monthly SPEI data with stationary and non-stationary probabilities (1-month time scale)",
+             digits = 4)
+```
+
+
+### $GEV.parameters
+
+The `$GEV.parameters` object for the 1-month time scale contains the time-varying GEV parameters:
+
+```{r display_gev_params, results='asis'}
+knitr::kable(Changes_SPEI_1month$GEV.parameters,
+             caption = "Time-varying GEV parameters by month and year (1-month time scale)",
+             digits = 4)
+```
