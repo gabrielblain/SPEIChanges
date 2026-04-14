@@ -91,6 +91,7 @@ Changes_SPEI_6month <- SPEIChanges_month(PPE.at.TS=PPE_atTS6,
                   nonstat.models = 3, 
                   criterion = "BIC")
 ```
+
 ## Interpreting the results
 
 The `SPEIChanges_month` function returns a list with: $Changes.Freq.Drought, $data.month, and $GEV.parameters. \
@@ -102,7 +103,7 @@ The `SPEIChanges_month` function returns a list with: $Changes.Freq.Drought, $da
 
 - **$GEV.parameters:** This object contains the time-varying parameters of the best-fitting GEV model (location, scale, and shape). If the input data has 30 years of records, this object will have 360 rows (30 years x 12 months) and 5 columns (month, year, location, scale, shape). This output is useful for understanding how the parameters of the GEV distribution evolve over time for each month. \
 
-### $Changes.Freq.Drought
+### Detailed look at the $Changes.Freq.Drought object: 1-month time scale
 
 The `$Changes.Freq.Drought` object for the 1-month time scale shows the changes in drought frequency by month:
 
@@ -112,16 +113,20 @@ knitr::kable(Changes_SPEI_1month$Changes.Freq.Drought,
              digits = 4)
 ```
 
-### $data.month
+- When applied at the 1-month time scale, the **$Changes.Freq.Drought** object indicates increasing drought frequency during the summer (June and July) and autumn (September and October) seasons. These changes are expressed as percentages in the columns *ChangeMod*, *ChangeSev*, and *ChangeExt*, which represent shifts in the frequency of moderate-to-extreme, severe-to-extreme, and extreme drought events, respectively. During these months, decreases were also observed in the expected climatic P–PE values (i.e., the P–PE values corresponding to SPEI = 0). Specifically, the columns *StatNormalPPE* and *NonStatNormalPPE* provide these expected values under stationary and non-stationary assumptions, respectively. In contrast, December exhibits the opposite behavior, with changes indicating a decrease in drought frequency.
+
+### Detailed look at the $data.month object: 1-month time scale
 
 The `$data.month` object for the 1-month time scale contains the following data:
 
 ```{r display_data_month, results='asis'}
 knitr::kable(Changes_SPEI_1month$data.month, 
-             caption = "Monthly SPEI data with stationary and non-stationary probabilities (1-month time scale)",
+             caption = "Monthly data with stationary and non-stationary probabilities (1-month time scale)",
              digits = 4)
 ```
 
+
+- As can be noted in the table above, the `$data.month` object includes the P - PE values, SPEI values, cumulative probabilities under both stationary and non-stationary approaches, and the frequency changes in below-zero SPEI values caused by shifts in P - PE patterns. This data allows us to analyze how the probability of drought conditions (SPEI < 0) has evolved over time for each month, and how it differs between stationary and non-stationary assumptions.
 
 ### $GEV.parameters
 
@@ -132,3 +137,5 @@ knitr::kable(Changes_SPEI_1month$GEV.parameters,
              caption = "Time-varying GEV parameters by month and year (1-month time scale)",
              digits = 4)
 ```
+
+- As shown in the table above, the `$GEV.parameters` object includes the month and the location, scale, and shape parameters of the best-fitting GEV model for each month and year. This information is crucial for understanding how the distribution of P - PE values changes over time and how it affects drought frequency.
