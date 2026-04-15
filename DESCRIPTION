@@ -39,6 +39,7 @@ Depends:
 LazyData: true
 Suggests: 
     dplyr,
+    kableExtra,
     knitr,
     rmarkdown,
     SPEI,

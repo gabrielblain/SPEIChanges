@@ -120,9 +120,11 @@ knitr::kable(Changes_SPEI_1month$Changes.Freq.Drought,
 The `$data.month` object for the 1-month time scale contains the following data:
 
 ```{r display_data_month, results='asis'}
+library(kableExtra)
 knitr::kable(Changes_SPEI_1month$data.month, 
-             caption = "Monthly data with stationary and non-stationary probabilities (1-month time scale)",
-             digits = 4)
+      caption = "Monthly data with stationary and non-stationary probabilities (1-month time scale)",      digits = 4)  %>%
+  kable_styling() %>%
+  scroll_box(height = "400px")
 ```
 
 
@@ -135,7 +137,42 @@ The `$GEV.parameters` object for the 1-month time scale contains the time-varyin
 ```{r display_gev_params, results='asis'}
 knitr::kable(Changes_SPEI_1month$GEV.parameters,
              caption = "Time-varying GEV parameters by month and year (1-month time scale)",
-             digits = 4)
+             digits = 4)%>%
+  kable_styling() %>%
+  scroll_box(height = "400px")
 ```
 
 - As shown in the table above, the `$GEV.parameters` object includes the month and the location, scale, and shape parameters of the best-fitting GEV model for each month and year. This information is crucial for understanding how the distribution of P - PE values changes over time and how it affects drought frequency.
+
+## An alternative basic time scale: Quasi-weekly periods
+
+The `SPEIChanges` method can also be applied to quasi-weekly periods instead of monthly data. This allows for a more detailed analysis of drought frequency changes on a finer temporal scale. The process is similar to the monthly analysis, but the input daily data must be aggregated into quasi-weekly periods using the `PPEaggreg` function. This basic time scale splits each month into four sub-periods: days 1 to 7, days 8 to 14, days 15 to 21, and days 22 to 28, 29, 30, or 31 depending on the month. When TS = 4, the time scale corresponds to a moving window with a one-month length that is calculated four times each month. When TS = 12, the time scale corresponds to a moving window with a 3-month length that is calculated four times each month. The function `SPEIChanges` can then be applied to the aggregated data to assess changes in drought frequency on a quasi-weekly basis. This approach provides a more granular view of how drought conditions evolve throughout the month and can help identify specific periods within the month that are more susceptible to changes in drought frequency. Below is an example of how to apply the `SPEIChanges` method to quasi-weekly data, using daily data from the weather station of Campinas, Brazil (also included in the package):
+
+```{r quasi_weekly}
+data("Campinas_daily")
+head(Campinas_daily)
+# Estimating daily P - PE values using the Hargreaves and Samani method
+daily.PPE <- Campinas[, 9]
+# Aggregating daily P - PE values into quasi-weekly periods (TS = 4)
+PPE.atTS <- PPEaggreg(daily.PPE, start.date = "1890-01-01", TS = 4)
+# Assessing changes in drought frequency using the SPEIChanges method for quasi-weekly data
+Changes_SPEI_quasi_weekly <- SPEIChanges(PPE.at.TS = PPE.atTS, 
+                                         nonstat.models = 3,
+                                         criterion = "BIC")
+```
+
+## Interpreting the results
+
+As the `SPEIChanges_month`, the `SPEIChanges` function also returns a list with `$Changes.Freq.Drought`, `$data.month`, and `$GEV.parameters`. The interpretation of all these outputs is similar to the monthly analysis, but now the results are provided for each quasi-weekly period instead of each month. The table below shows the changes in drought frequency (`$Changes.Freq.Drought` object) for the quasi-weekly periods:
+
+```{r display_changes_freq_quasi_weekly, results='asis'}
+knitr::kable(Changes_SPEI_quasi_weekly$Changes.Freq.Drought,
+             caption = "Changes in drought frequency by quasi-weekly period (TS = 4)",
+             format = "html",
+             digits = 4)
+```
+
+- The table above shows the changes in drought frequency for each quasi-weekly period. Similar to the monthly analysis, we can identify specific periods within the month that exhibit significant changes in drought frequency. For example, certain quasi-weekly periods showed an increase in moderate-to-extreme, sevre-to-extreme and extreme drought events. This detailed analysis allows for a more nuanced understanding of how drought conditions are evolving throughout the month and can help inform targeted drought management strategies. Overall, the `SPEIChanges` method indicated that the location of Campinas is experiencing significant changes towards increased drought frequency. This result is consistent with the observed changes in the expected P - PE values under both stationary and non-stationary approaches, which show a decrease in the expected P - PE values (i.e., the P - PE values corresponding to SPEI = 0) during the last decades. These findings may have important implications for water resource management and agricultural practices in the region.
+
+# Conclusion
+The `SPEIChanges` package provides a powerful tool for assessing changes in drought frequency over time using the SPEI index. By applying the method to both monthly and quasi-weekly data, users can gain insights into how drought conditions are evolving and identify specific periods that are more susceptible to changes in drought frequency. The outputs of the `SPEIChanges` function, including changes in drought frequency, cumulative probabilities, and GEV parameters, offer valuable information for understanding and managing drought risks under climate change conditions. 
