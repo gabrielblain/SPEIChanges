@@ -9,23 +9,33 @@ export(Ra)
 export(SPEIChanges)
 export(SPEIChanges_month)
 export(Soil_Heat_Flux)
-importFrom(CropWaterBalance,ET0_HS)
-importFrom(CropWaterBalance,ET0_PM)
-importFrom(CropWaterBalance,ET0_PT)
-importFrom(CropWaterBalance,Soil_Heat_Flux)
-importFrom(extRemes,pevd)
-importFrom(extRemes,qevd)
+importFrom(CropWaterBalance,
+  ET0_HS,
+  ET0_PM,
+  ET0_PT,
+  Soil_Heat_Flux
+)
+importFrom(extRemes,
+  pevd,
+  qevd
+)
 importFrom(ismev,gev.fit)
-importFrom(lubridate,day)
-importFrom(lubridate,make_date)
-importFrom(lubridate,month)
-importFrom(lubridate,parse_date_time)
-importFrom(lubridate,year)
+importFrom(lubridate,
+  day,
+  make_date,
+  month,
+  parse_date_time,
+  year
+)
 importFrom(progress,progress_bar)
 importFrom(rlang,arg_match)
 importFrom(spsUtil,quiet)
-importFrom(stats,na.omit)
-importFrom(stats,qnorm)
-importFrom(utils,setTxtProgressBar)
-importFrom(utils,txtProgressBar)
+importFrom(stats,
+  na.omit,
+  qnorm
+)
+importFrom(utils,
+  setTxtProgressBar,
+  txtProgressBar
+)
 importFrom(zoo,rollsum)
