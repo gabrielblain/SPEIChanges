@@ -26,10 +26,6 @@ Co-author
 Co-author  
 [ORCID 0000-0002-0299-3005](https://orcid.org/0000-0002-0299-3005)
 
-**Rafael Vinicius de São José**  
-Co-author  
-[ORCID 0009-0005-4522-2269](https://orcid.org/0009-0005-4522-2269)
-
 ## Basic Description
 
 The {SPEIChanges} package was created to detect climate changes in the
@@ -136,9 +132,9 @@ head(Changes_SPEI$data.week)
 #> 1 1890     1         4    155.03  0.763         0.777            0.777
 #> 2 1890     2         1     -1.74 -0.723         0.235            0.235
 #> 3 1890     2         2     78.97  0.212         0.584            0.584
-#> 4 1890     2         3     53.69  0.075         0.530            0.422
+#> 4 1890     2         3     53.69  0.075         0.530            0.530
 #> 5 1890     2         4     75.98  0.359         0.640            0.525
-#> 6 1890     3         1     65.11  0.408         0.658            0.563
+#> 6 1890     3         1     65.11  0.408         0.658            0.658
 #>   ChangeDryFreq
 #> 1     NoDrought
 #> 2             0
